@@ -8,3 +8,4 @@ target_claimsTrunc = target_claimsTrunc_orig_order(target_memberids_i);
 target_DIH = C{1}(target_memberids_i,3);
 
 target_genders = extractMemberTraits( members, target_memberids, genders );
+target_ages = extractMemberTraits( members, target_memberids, ages );
