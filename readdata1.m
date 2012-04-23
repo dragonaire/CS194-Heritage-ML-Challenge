@@ -1,9 +1,8 @@
 clear;
 readMembers;
 readDIH;
+getLogTraits;
 readTarget;
-[ labcount_members, lab_years, lab_duration, lab_count ] = readLabCounts();
-[ drugcount_members, drug_years, drug_duration, drug_count ] = readDrugCounts();
 
 %TODO clean up member numbers to be in the range 1-113000 and keep a
 %mapping back to original numbers
@@ -14,4 +13,6 @@ readTarget;
 
 %computeTargetDIH_constant;
 computeTargetDIH_sexonly;
-writeTarget;
+writeTarget('Target_1.csv');
+computeTargetDIH_ageonly;
+writeTarget('Target_2.csv');
