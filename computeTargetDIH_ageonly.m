@@ -20,8 +20,10 @@ target_DIH = zeros(NUM_TARGETS,1);
 for i = BUCKET_RANGES.AGE
     target_DIH(target_ages == i) = DIHages(i);
 end
+%TODO: the last age bucket is for missing age. This could be throwing things off.
+% Maybe we could try just putting in the normal constant instead.
 
-% YANG TO DO:
+% YANG TODO:
 % remove hard-coded stuff
 % make computeTargetDIH_<one-field>only.m
 % a generalized function
