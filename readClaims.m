@@ -1,27 +1,81 @@
-function [ members,providers,vendors,pcps, ] = readClaims()
-
+function [ members,provider,vendor,pcp,year,specialty,place,payDelay,LoS,...
+    DSFS,condGroup,charlson,procedure] = readClaims()
+try
+    load('claims.mat');
+    return;
+catch
+    'Claims were not cached! This could take a few minutes.'
+end
 fid = fopen('Claims.csv','rt');
-% MemberID,ProviderID,Vendor,PCP,Year,Specialty,PlaceSvc,PayDelay,LengthOfStay,
-% DSFS,PrimaryConditionGroup,CharlsonIndex,ProcedureGroup,SupLOS
+% ints: MemberID,ProviderID,Vendor,PCP
+% strings: Year,Specialty,PlaceSvc,PayDelay,LengthOfStay,
+% DSFS,PrimaryConditionGroup,CharlsonIndex,ProcedureGroup
+% ints: SupLOS
 % Note: DSFS is Days Since First Service
+%TODO change textscan to use the 'HeaderLines' param
 C = textscan(fid,'%f %f %f %f %s %s %s %s %s %s %s %s %s %f','Delimiter',',','CollectOutput',1);
 fclose(fid);
 [members, members_i] = sort(C{1}(:,1));
-providers = C{1}(members_i,2);
-vendors = C{1}(members_i,3);
-pcps = C{1}(members_i,4);
+provider = C{1}(members_i,2);
+vendor = C{1}(members_i,3);
+pcp = C{1}(members_i,4);
 stringYear = C{2}(members_i,1);
-years = strcmp(stringYear, 'Y1') + 2*strcmp(stringYear, 'Y2') + ...
+year = 1*strcmp(stringYear, 'Y1') + 2*strcmp(stringYear, 'Y2') + ...
     3*strcmp(stringYear, 'Y3');
 stringSpecialty = C{2}(members_i,2);
-%TODO
-string = C{2}(members_i,3);
-string = C{2}(members_i,4);
-string = C{2}(members_i,5);
-string = C{2}(members_i,6);
-string = C{2}(members_i,7);
-string = C{2}(members_i,8);
-string = C{2}(members_i,9);
+specialty = 1*strcmp(stringSpecialty,'Anesthesiology') + ...
+    2*strcmp(stringSpecialty,'Diagnostic Imaging') + ...
+    3*strcmp(stringSpecialty,'Emergency') + ...
+    4*strcmp(stringSpecialty,'General Practice') + ...
+    5*strcmp(stringSpecialty,'Internal') + ...
+    6*strcmp(stringSpecialty,'Laboratory') + ...
+    7*strcmp(stringSpecialty,'Obstetrics and Gynecology') + ...
+    8*strcmp(stringSpecialty,'Pathology') + ...
+    9*strcmp(stringSpecialty,'Pediatrics') + ...
+    10*strcmp(stringSpecialty,'Rehabilitation') + ...
+    11*strcmp(stringSpecialty,'Surgery') + ...
+    12*strcmp(stringSpecialty,'Other') + ...
+    13*strcmp(stringSpecialty,'');
+stringPlace = C{2}(members_i,3);
+place = 1*strcmp(stringPlace,'') + ...
+    2*strcmp(stringPlace,'Ambulance') + ...
+    3*strcmp(stringPlace,'Home') + ...
+    4*strcmp(stringPlace,'Inpatient Hospital') + ...
+    5*strcmp(stringPlace,'Independent Lab') + ...
+    6*strcmp(stringPlace,'Office') + ...
+    7*strcmp(stringPlace,'Outpatient Hospital') + ...
+    8*strcmp(stringPlace,'Urgent Care') + ...
+    9*strcmp(stringPlace,'Other');
+payDelay = str2double(C{2}(members_i,4));
+payDelay(isnan(payDelay)) = 162; % for replacing 162+ with 162
+LoS = str2double(C{2}(members_i,5));
+LoS(find(C{3}==0)) = -1;
+LoS(isnan(LoS)) = 26; % for replacing 26+ with 26
+DSFS = parseMonthCounts(C{2}(members_i,6));
+stringCondGroup = C{2}(members_i,7);
+condGroup = parseConditionGroup(stringCondGroup);
+stringCharlson = C{2}(members_i,8);
+charlson = 1*strcmp(stringCharlson,'0') + ...
+    2*strcmp(stringCharlson,'1-2') + ...
+    3*strcmp(stringCharlson,'2-3') + ...
+    4*strcmp(stringCharlson,'3-4') + ...
+    5*strcmp(stringCharlson,'5+');
+stringProcGroup = C{2}(members_i,9);
+procedure = parseProcedureGroups(stringProcGroup);
 
+%check that parsing went as planned
+'Errors?'
+length(find(year==0))
+length(find(specialty==0))
+length(find(place==0))
+sum(LoS==0)
+length(find(DSFS==0))
+length(find(condGroup==0))
+length(find(charlson==0))
+length(find(procedure==0))
+checkArray(year,BUCKET_RANGES.YEAR)
+
+save('claims.mat','members','provider','vendor','pcp','year','specialty',...
+    'place','payDelay','LoS','DSFS','condGroup','charlson','procedure');
 end
 

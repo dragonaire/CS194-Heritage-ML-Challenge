@@ -16,13 +16,13 @@ DIH_genders2 = extractMemberTraits( members, DIH2_memberids, genders );
 DIH_genders3 = extractMemberTraits( members, DIH3_memberids, genders );
 
 % dont double count patients who were in both year 2 and year 3
-[ DIH_genders, DIH_members ] = ...
+[ DIH_genders, members23 ] = ...
     combineYears( DIH2_memberids, DIH3_memberids, DIH_genders2, DIH_genders3, true );
-[ DIH23, DIH_members ] = combineYears( DIH2_memberids, DIH3_memberids, DIH2, DIH3, true );
+[ DIH23, members23 ] = combineYears( DIH2_memberids, DIH3_memberids, DIH2, DIH3, true );
 
-DIHmale = DIH23(find(DIH_genders==MALE));
-DIHfemale = DIH23(find(DIH_genders==FEMALE));
-DIHnosex = DIH23(find(DIH_genders==NOSEX));
+DIHmale = DIH23(DIH_genders==MALE);
+DIHfemale = DIH23(DIH_genders==FEMALE);
+DIHnosex = DIH23(DIH_genders==NOSEX);
 
 logDIHmale = log(DIHmale+1);
 logDIHfemale = log(DIHfemale+1);

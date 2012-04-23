@@ -1,5 +1,5 @@
 % find optimal # of days for age bins
-num_bins = 10;
+num_bins = length(BUCKET_RANGES.AGE);
 cvx_begin
     variables logDIH(num_bins,1);
     minimize(norm([logDIH(1)-logDIHagebins{1};...
@@ -16,6 +16,7 @@ cvx_end
 
 DIHages = exp(logDIH) - 1;
 
+target_DIH = zeros(NUM_TARGETS,1);
 for i = 1:num_bins
     target_DIH(target_ages == (i-1)) = DIHages(i);
 end
