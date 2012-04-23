@@ -17,8 +17,8 @@ cvx_end
 DIHages = exp(logDIH) - 1;
 
 target_DIH = zeros(NUM_TARGETS,1);
-for i = 1:num_bins
-    target_DIH(target_ages == (i-1)) = DIHages(i);
+for i = BUCKET_RANGES.AGE
+    target_DIH(target_ages == i) = DIHages(i);
 end
 
 % YANG TO DO:
