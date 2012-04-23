@@ -1,3 +1,4 @@
+function [ labcount_members, lab_years, lab_duration, lab_count ] = readLabCounts()
 fid = fopen('LabCount.csv','rt');
 C = textscan(fid,'%f %s %s %s','Delimiter',',','CollectOutput',1);
 fclose(fid);
@@ -21,4 +22,4 @@ lab_duration = 0*strcmp(stringLabDuration,'0- 1 month') + ...
     11*strcmp(stringLabDuration,'11-12 months');
 lab_count = str2double(C{2}(labcount_members_i,3));
 lab_count(find(isnan(lab_count))) = 10; % for replacing 10+ with 10
-
+end
