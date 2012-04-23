@@ -11,3 +11,4 @@ target_genders = extractMemberTraits( members, target_memberids, genders );
 target_params.memberids_orig_order = target_memberids_orig_order;
 target_params.claimsTrunc_orig_order = target_claimsTrunc_orig_order;
 target_params.DIH = target_DIH;
+target_ages = extractMemberTraits( members, target_memberids, ages );
