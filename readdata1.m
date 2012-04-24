@@ -1,10 +1,9 @@
 clear;
 tic
-constants;
-readMembers;
-readDIH;
-getLogTraits;
-readTarget;
+[members,genders,ages] = readMembers();
+[members23,logDIH,DIH23,genders23,ages23] = readDIH(members,genders,ages);
+bins = extractBins(DIH23,genders23,ages23);
+target = readTarget(members, genders, ages);
 toc
 %TODO organize claims by member
 tic
@@ -21,11 +20,9 @@ toc
 
 %computeTargetDIH_constant;
 tic
-computeTargetDIH_sexonly;
-target_params.DIH = target_DIH;
-writeTarget('Target_1.csv',target_params);
-computeTargetDIH_ageonly;
-target_params.DIH = target_DIH;
-writeTarget('Target_2.csv',target_params);
+target.DIH = computeTargetDIH_sexonly(target,logDIH);
+writeTarget('Target_1.csv',target);
+target.DIH = computeTargetDIH_ageonly(target,bins);
+writeTarget('Target_2.csv',target);
 toc
 'DONE!'

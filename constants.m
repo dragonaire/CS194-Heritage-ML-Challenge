@@ -1,6 +1,9 @@
 NUM_TARGETS = 70942;
+NUM_TRAINING = 113000;
 
 MAXPAYDELAY = 162;
+% 1 for male, 2 for female, 0 for no sex
+MALE = 1; FEMALE = 2; NOSEX = 0;
 
 BUCKET_RANGES.AGE = 1:10;
 BUCKET_RANGES.YEAR = 1:3;

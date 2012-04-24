@@ -1,6 +1,6 @@
-function [] = writeTarget(filename,target_params)
+function [] = writeTarget(filename,target)
 % writes predicted DIH as .csv to target filename (i.e. 'Target_1.csv')
-T = [target_params.memberids_orig_order';target_params.claimsTrunc_orig_order';target_params.DIH'];
+T = [target.memberids_orig_order';target.claimsTrunc_orig_order';target.DIH'];
 fid = fopen(filename,'w');
 fprintf(fid,'MemberID,ClaimsTruncated,DaysInHospital\n');
 fprintf(fid,'%d,%d,%f\n',T);
