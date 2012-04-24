@@ -24,5 +24,7 @@ target.DIH = computeTargetDIH_sexonly(target,logDIH);
 writeTarget('Target_1.csv',target);
 target.DIH = computeTargetDIH_ageonly(target,bins);
 writeTarget('Target_2.csv',target);
+target.DIH = computeTargetDIH_DIHonly(target,logDIH);
+writeTarget('Target_3.csv',target);
 toc
 'DONE!'

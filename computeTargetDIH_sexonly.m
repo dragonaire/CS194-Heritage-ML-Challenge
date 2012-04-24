@@ -9,7 +9,7 @@ DIHm = exp(DIHm)-1
 DIHf = exp(DIHf)-1
 DIHns = exp(DIHns)-1
 
-target_DIH = zeros(NUM_TARGETS,1);
+target_DIH = 0.2.*ones(NUM_TARGETS,1);
 target_DIH(find(target.genders==MALE)) = DIHm;
 target_DIH(find(target.genders==FEMALE)) = DIHf;
 target_DIH(find(target.genders==NOSEX)) = DIHns;
