@@ -1,33 +1,23 @@
 % find optimal # of days for age bins
-
+constants;
 % get the ages just for members with DIH data.
 ages23 = extractMemberTraits( members, members23, ages );
 
 num_bins = length(BUCKET_RANGES.AGE) + 3;
-A = zeros(NUM_TRAINING,num_bins);
+A = zeros(length(ages23),num_bins);
 offset = length(BUCKET_RANGES.AGE) + 1;
-for i=1:NUM_TRAINING
-    A(i,ages(i)) = 1; %TODO is there a better way to do this for loop?
-    A(i,offset+genders(i)) = 1;
+for i=1:length(ages23)
+    A(i,ages23(i)) = 1; %TODO is there a better way to do this for loop?
+    A(i,offset+genders23(i)) = 1;
 end
-return
 A=sparse(A);
-return
 
 cvx_begin
     variables c(num_bins);
-    minimize(norm([logDIH(1)-logDIHagebins{1};...
-                   logDIH(2)-logDIHagebins{2};...
-                   logDIH(3)-logDIHagebins{3};...
-                   logDIH(4)-logDIHagebins{4};...
-                   logDIH(5)-logDIHagebins{5};...
-                   logDIH(6)-logDIHagebins{6};...
-                   logDIH(7)-logDIHagebins{7};...
-                   logDIH(8)-logDIHagebins{8};...
-                   logDIH(9)-logDIHagebins{9};...
-                   logDIH(10)-logDIHagebins{10}]));
+    minimize(norm(A*c - DIH23))
 cvx_end
-
+c
+return
 DIHages = exp(logDIH) - 1;
 
 for i = 1:num_bins
