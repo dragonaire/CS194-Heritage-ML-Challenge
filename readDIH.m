@@ -31,7 +31,7 @@ DIHnosex = DIH23(genders23==NOSEX);
 logDIH.male = log(DIHmale+1);
 logDIH.female = log(DIHfemale+1);
 logDIH.nosex = log(DIHnosex+1);
-logDIH.comb23 = log(DIH23);
+logDIH.comb23 = log(DIH23+1);
 logDIH.members23 = members23;
 
 end
