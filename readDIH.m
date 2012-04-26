@@ -1,37 +1,38 @@
-function [members23,logDIH,DIH23,genders23,ages23] = readDIH(members,genders,ages)
+function [members,logDIH,DIH,genders,ages,claimsTrunc] = readDIH(members,genders,ages)
 constants;
 fid = fopen('DaysInHospital_Y2.csv','rt');
 C = textscan(fid,'%f %f %f','Delimiter',',','CollectOutput',1);
 fclose(fid);
-[DIH2_memberids, DIH2_memberids_i] = sort(C{1}(:,1));
-claimsTrunc2 = C{1}(DIH2_memberids_i,2);
-DIH2 = C{1}(DIH2_memberids_i,3);
+[members.yr2, DIH2_memberids_i] = sort(C{1}(:,1));
+claimsTrunc.yr2 = C{1}(DIH2_memberids_i,2);
+DIH.yr2 = C{1}(DIH2_memberids_i,3);
 fid = fopen('DaysInHospital_Y3.csv','rt');
 C = textscan(fid,'%f %f %f','Delimiter',',','CollectOutput',1);
 fclose(fid);
-[DIH3_memberids, DIH3_memberids_i] = sort(C{1}(:,1));
-claimsTrunc3 = C{1}(DIH3_memberids_i,2);
-DIH3 = C{1}(DIH3_memberids_i,3);
+[members.yr3, DIH3_memberids_i] = sort(C{1}(:,1));
+claimsTrunc.yr3 = C{1}(DIH3_memberids_i,2);
+DIH.yr3 = C{1}(DIH3_memberids_i,3);
 
 % fill in missing 
-DIH_genders2 = extractMemberTraits( members, DIH2_memberids, genders );
-DIH_genders3 = extractMemberTraits( members, DIH3_memberids, genders );
+genders.yr2 = extractMemberTraits( members.all, members.yr2, genders.all );
+genders.yr3 = extractMemberTraits( members.all, members.yr3, genders.all );
 
 % dont double count patients who were in both year 2 and year 3
-[ genders23, members23 ] = ...
-    combineYears( DIH2_memberids, DIH3_memberids, DIH_genders2, DIH_genders3, true );
-[ DIH23, members23 ] = combineYears( DIH2_memberids, DIH3_memberids, DIH2, DIH3, true );
+[ genders.comb23, members.comb23 ] = ...
+    combineYears( members.yr2, members.yr3, genders.yr2, genders.yr3, true );
+[ DIH.comb23, members.comb23 ] = combineYears( members.yr2, members.yr3, DIH.yr2, DIH.yr3, true );
 
-ages23 = extractMemberTraits( members, members23, ages);
+ages.yr2 = extractMemberTraits( members.all, members.yr2, ages.all);
+ages.yr3 = extractMemberTraits( members.all, members.yr3, ages.all);
+ages.comb23 = extractMemberTraits( members.all, members.comb23, ages.all);
 
-DIHmale = DIH23(genders23==MALE);
-DIHfemale = DIH23(genders23==FEMALE);
-DIHnosex = DIH23(genders23==NOSEX);
+DIHmale = DIH.comb23(genders.comb23==MALE);
+DIHfemale = DIH.comb23(genders.comb23==FEMALE);
+DIHnosex = DIH.comb23(genders.comb23==NOSEX);
 
 logDIH.male = log(DIHmale+1);
 logDIH.female = log(DIHfemale+1);
 logDIH.nosex = log(DIHnosex+1);
-logDIH.comb23 = log(DIH23);
-logDIH.members23 = members23;
+logDIH.comb23 = log(DIH.comb23+1);
 
 end
