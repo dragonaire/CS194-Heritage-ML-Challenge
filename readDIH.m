@@ -35,5 +35,7 @@ logDIH.female = log(DIHfemale+1);
 logDIH.nosex = log(DIHnosex+1);
 logDIH.comb23 = log(DIH23+1);
 logDIH.members23 = members23;
+logDIH.yr2 = log(DIH.yr2+1);
+logDIH.yr3 = log(DIH.yr3+1);
 
 end
