@@ -1,10 +1,10 @@
 function target_DIH = computeTargetDIH_DIHonly(target, logDIH)
 % find optimal # of days give prev DIH (Y2, Y3)
 constants;
-total = length(logDIH.comb23);  
+total = length(logDIH.yr3);  
 cvx_begin
     variables logDIH(total, 1);
-    minimize(norm(logDIH - logDIH.comb23));
+    minimize(norm(logDIH - logDIH.yr3));
 cvx_end
 
 DIH = exp(logDIH) - 1;

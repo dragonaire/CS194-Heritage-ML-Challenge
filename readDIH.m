@@ -34,5 +34,7 @@ logDIH.male = log(DIHmale+1);
 logDIH.female = log(DIHfemale+1);
 logDIH.nosex = log(DIHnosex+1);
 logDIH.comb23 = log(DIH.comb23+1);
+logDIH.yr2 = log(DIH.yr2+1);
+logDIH.yr3 = log(DIH.yr3+1);
 
 end
