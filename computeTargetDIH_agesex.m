@@ -1,22 +1,23 @@
 function target_DIH = computeTargetDIH_agesex(target,ages,genders,logDIH)
-% find optimal # of days for age bins
+% find optimal # of days for age and sex bins
 constants;
-
 num_bins = length(BUCKET_RANGES.AGE) + length(BUCKET_RANGES.SEX);
-A = zeros(length(ages),num_bins);
 offset = length(BUCKET_RANGES.AGE);
-for i=1:length(ages)
-    A(i,ages(i)) = 1; %TODO is there a better way to do this for loop?
-    A(i,offset+genders(i)) = 1;
-end
-A=sparse(A);
+rows_i = [1:71435 1:71435];
+cols_i = [ages' (offset+genders)'];
+val = 1;
+nrows = length(ages);
+ncols = num_bins;
+A = sparse(rows_i, cols_i, val, nrows, ncols);
 
 cvx_begin
     variables c(num_bins);
     minimize(norm(A*c - logDIH))
 cvx_end
-c_age = c(1:length(BUCKET_RANGES.AGE))
-c_sex = c(length(BUCKET_RANGES.AGE)+1:length(BUCKET_RANGES.AGE)+length(BUCKET_RANGES.SEX))
+c_age = c(1:length(BUCKET_RANGES.AGE));
+c_sex = c(length(BUCKET_RANGES.AGE)+1:length(BUCKET_RANGES.AGE)+length(BUCKET_RANGES.SEX));
+c_age = exp(c_age) - 1
+c_sex = exp(c_sex) - 1
 %TODO
 target_DIH = c_age(target.ages) + c_sex(target.genders);
 end
