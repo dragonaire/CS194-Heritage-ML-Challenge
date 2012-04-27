@@ -15,8 +15,13 @@ cvx_begin
     variables c(num_bins);
     minimize(norm(A*c - logDIH))
 cvx_end
-c
-c_age = c(1:length(BUCKET_RANGES.AGE));
-c_sex = c(length(BUCKET_RANGES.AGE)+1:length(BUCKET_RANGES.AGE)+length(BUCKET_RANGES.SEX));
+c_age = c(1:length(BUCKET_RANGES.AGE))
+c_sex = c(length(BUCKET_RANGES.AGE)+1:length(BUCKET_RANGES.AGE)+length(BUCKET_RANGES.SEX))
+%TODO
 target_DIH = c_age(target.ages) + c_sex(target.genders);
 end
+
+%TODO
+% crossvalidation
+% add in all fields to the array
+% ensemble or ridge regression
