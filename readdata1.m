@@ -34,7 +34,7 @@ target.DIH = computeTargetDIH_ageonly(target,bins);
 allDIH(:,2) = target.DIH;
 writeTarget('Target_2.csv',target);
 
-%target.DIH = computeTargetDIH_DIHonly(target,logDIH, true);
+target.DIH = computeTargetDIH_DIHonly(target,logDIH,members,true);
 allDIH(:,3) = target.DIH;
 writeTarget('Target_3.csv',target);
 
