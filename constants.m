@@ -1,5 +1,7 @@
 NUM_TARGETS = 70942;
 NUM_TRAINING = 113000;
+MIN_PREDICTION = 0;
+MAX_PREDICTION = 15;
 
 MAXPAYDELAY = 162;
 % 1 for male, 2 for female, 0 for no sex

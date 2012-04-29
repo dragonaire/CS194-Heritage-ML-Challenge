@@ -38,6 +38,7 @@ c_age = c(1:length(BUCKET_RANGES.AGE))
 c_sex = c(length(BUCKET_RANGES.AGE)+1:length(BUCKET_RANGES.AGE)+length(BUCKET_RANGES.SEX))
 %TODO
 target_DIH = c_age(target.ages) + c_sex(target.genders);
+target_DIH = exp(target_DIH)-1;
 %end
 
 %TODO
