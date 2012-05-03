@@ -15,6 +15,7 @@ cvx_begin
                    dih(9)-bins.yr3.age{9};...
                    dih(10)-bins.yr3.age{10}]));
 cvx_end
+%if strcmp(cvx_status
 
 DIHages = exp(dih) - 1;
 

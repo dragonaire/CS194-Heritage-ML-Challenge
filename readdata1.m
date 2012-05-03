@@ -7,7 +7,7 @@ target = readTarget(members, genders, ages);
 toc
 drugs = readDrugCounts(target,members);
 toc
-lab = readLabCounts();
+lab = readLabCounts(target,members);
 toc
 %TODO organize claims by member
 [ claim_members,provider,vendor,pcp,year,specialty,place,payDelay,LoS,...
@@ -27,7 +27,8 @@ toc
 %computeTargetDIH_constant;
 tic
 constants;
-allDIH = zeros(NUM_TARGETS, 6);
+NUM_PREDICTORS = 7;
+allDIH = zeros(NUM_TARGETS, NUM_PREDICTORS);
 
 target.DIH = computeTargetDIH_sexonly(target,logDIH);
 allDIH(:,1) = target.DIH;
@@ -49,8 +50,12 @@ target.DIH = computeTargetDIH_agesexdrug(target,ages,genders,logDIH,drugs);
 allDIH(:,5) = target.DIH;
 writeTarget('Target_5.csv',target);
 
+target.DIH = computeTargetDIH_agesexdruglab(target,ages,genders,logDIH,drugs,lab);
+allDIH(:,6) = target.DIH;
+writeTarget('Target_6.csv',target);
+
 %get median DIH for each member
 target.DIH = median(allDIH,2);
-writeTarget('Target_6.csv',target);
+writeTarget(sprintf('Target_%d.csv',NUM_PREDICTORS),target);
 toc
 'DONE!'

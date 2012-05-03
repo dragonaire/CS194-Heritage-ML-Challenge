@@ -1,9 +1,7 @@
 function [] = writeTarget(filename,target)
 constants;
-if min(target.DIH)<MIN_PREDICTION || max(target.DIH)>MAX_PREDICTION
-    sprintf('invalid prediction: %f or %f\n', min(target.DIH), max(target.DIH))
-    keyboard
-end
+target.DIH = max(target.DIH, MIN_PREDICTION);
+target.DIH = min(target.DIH, MAX_PREDICTION);
 % put the predictions back into the right order
 target.DIH(target.memberids_i) = target.DIH;
 % writes predicted DIH as .csv to target filename (i.e. 'Target_1.csv')
