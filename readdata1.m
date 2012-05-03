@@ -5,8 +5,11 @@ tic
 bins = extractBins(DIH,genders,ages);
 target = readTarget(members, genders, ages);
 toc
+drugs = readDrugCounts();
+toc
+lab = readLabCounts();
+toc
 %TODO organize claims by member
-tic
 [ claim_members,provider,vendor,pcp,year,specialty,place,payDelay,LoS,...
     DSFS,condGroup,charlson,procedure] = readClaims();
 
