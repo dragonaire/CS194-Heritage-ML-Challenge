@@ -3,7 +3,7 @@ function target_DIH = computeTargetDIH_agesex(target,ages,genders,logDIH,bins)
 constants;
 num_bins = length(BUCKET_RANGES.AGE) + length(BUCKET_RANGES.SEX);
 offset = length(BUCKET_RANGES.AGE);
-rows_i = [1:71435 1:71435];
+rows_i = [1:length(ages) 1:length(ages)];
 cols_i = [ages' (offset+genders)'];
 val = 1;
 nrows = length(ages);

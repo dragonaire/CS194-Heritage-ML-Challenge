@@ -5,7 +5,7 @@ tic
 bins = extractBins(DIH,genders,ages);
 target = readTarget(members, genders, ages);
 toc
-drugs = readDrugCounts();
+drugs = readDrugCounts(target,members);
 toc
 lab = readLabCounts();
 toc
@@ -27,7 +27,7 @@ toc
 %computeTargetDIH_constant;
 tic
 constants;
-allDIH = zeros(NUM_TARGETS, 5);
+allDIH = zeros(NUM_TARGETS, 6);
 
 target.DIH = computeTargetDIH_sexonly(target,logDIH);
 allDIH(:,1) = target.DIH;
@@ -45,8 +45,12 @@ target.DIH = computeTargetDIH_agesex(target,ages.yr3,genders.yr3,logDIH.yr3,bins
 allDIH(:,4) = target.DIH;
 writeTarget('Target_4.csv',target);
 
+target.DIH = computeTargetDIH_agesexdrug(target,ages,genders,logDIH,drugs);
+allDIH(:,5) = target.DIH;
+writeTarget('Target_5.csv',target);
+
 %get median DIH for each member
 target.DIH = median(allDIH,2);
-writeTarget('Target_5.csv',target);
+writeTarget('Target_6.csv',target);
 toc
 'DONE!'

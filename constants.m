@@ -10,6 +10,10 @@ NOAGE = 10;
 
 BUCKET_RANGES.SEX = 1:3;
 BUCKET_RANGES.AGE = 1:10;
+
+BUCKET_RANGES.DRUG_1YR = 1:7; % accounts for 7 drug counts over 1 year
+BUCKET_RANGES.DRUG_2YRS = 1:14; % accounts for 7 drug counts over 2 years
+
 BUCKET_RANGES.YEAR = 1:3;
 BUCKET_RANGES.SPECIALTY = 1:13;
 BUCKET_RANGES.PLACE = 1:9;
