@@ -1,4 +1,4 @@
-function [target_DIH] = computeTargetDIH_ageonly(target,bins)
+function target_DIH = computeTargetDIH_ageonly(target,bins)
 constants;
 % find optimal # of days for age bins
 num_bins = length(BUCKET_RANGES.AGE);

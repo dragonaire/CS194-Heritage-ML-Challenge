@@ -6,6 +6,7 @@ MAX_PREDICTION = 15;
 MAXPAYDELAY = 162;
 % 1 for male, 2 for female, 0 for no sex
 MALE = 1; FEMALE = 2; NOSEX = 3;
+NOAGE = 10;
 
 BUCKET_RANGES.SEX = 1:3;
 BUCKET_RANGES.AGE = 1:10;

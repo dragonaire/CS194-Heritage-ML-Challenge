@@ -38,11 +38,7 @@ target.DIH = computeTargetDIH_DIHonly(target,logDIH,members,true);
 allDIH(:,3) = target.DIH;
 writeTarget('Target_3.csv',target);
 
-%target.DIH = computeTargetDIH_agesex(target,ages.comb23,genders.comb23,logDIH.comb23);
-%allDIH(:,4) = target.DIH;
-%writeTarget('Target_4.csv',target);
-
-target.DIH = computeTargetDIH_agesex(target,ages.yr3,genders.yr3,logDIH.yr3);
+target.DIH = computeTargetDIH_agesex(target,ages.yr3,genders.yr3,logDIH.yr3,bins);
 allDIH(:,4) = target.DIH;
 writeTarget('Target_4.csv',target);
 
