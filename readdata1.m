@@ -46,7 +46,7 @@ target.DIH = computeTargetDIH_agesex(target,ages.yr3,genders.yr3,logDIH.yr3,bins
 allDIH(:,4) = target.DIH;
 writeTarget('Target_4.csv',target);
 
-target.DIH = computeTargetDIH_agesexdrug(target,ages,genders,logDIH,drugs);
+target.DIH = computeTargetDIH_agesexdrug(target,ages.yr3,genders.yr3,logDIH.yr3,drugs.features3_1yr,drugs.features4_1yr);
 allDIH(:,5) = target.DIH;
 writeTarget('Target_5.csv',target);
 

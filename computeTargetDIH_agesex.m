@@ -1,4 +1,4 @@
-function target_DIH = computeTargetDIH_agesex(target,ages,genders,logDIH,bins)
+function [target_DIH, params] = computeTargetDIH_agesex(target,ages,genders,logDIH,bins)
 % find optimal # of days for age and sex bins
 constants;
 num_bins = length(BUCKET_RANGES.AGE) + length(BUCKET_RANGES.SEX);
@@ -19,6 +19,8 @@ c_age = c(1:length(BUCKET_RANGES.AGE))
 c_sex = c(length(BUCKET_RANGES.AGE)+1:length(BUCKET_RANGES.AGE)+length(BUCKET_RANGES.SEX))
 target_DIH = c_age(target.ages) + c_sex(target.genders);
 target_DIH = exp(target_DIH)-1;
+
+params = [c_age; c_sex];
 
 % use the sex constant for ppl with missing ages
 %{
