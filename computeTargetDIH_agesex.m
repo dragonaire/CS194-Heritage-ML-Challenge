@@ -18,7 +18,7 @@ if ~strcmp(cvx_status,'Solved')
     'computeTargetDIH_agesex failed'
     keyboard
 end
-disp(sprintf('TEST ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
+disp(sprintf('computeTargetDIH_agesex TRAINING ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
 
 c_age = c(1:length(BUCKET_RANGES.AGE))
 c_sex = c(length(BUCKET_RANGES.AGE)+1:length(BUCKET_RANGES.AGE)+length(BUCKET_RANGES.SEX))

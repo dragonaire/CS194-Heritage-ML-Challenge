@@ -19,7 +19,7 @@ if ~strcmp(cvx_status,'Solved')
     'computeTargetDIH_ageonly failed'
     keyboard
 end
-disp(sprintf('computeTargetDIH_ageonly TEST ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
+disp(sprintf('computeTargetDIH_ageonly TRAINING ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
 
 DIHages = exp(dih) - 1;
 

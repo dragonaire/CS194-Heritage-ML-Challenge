@@ -19,7 +19,7 @@ if ~strcmp(cvx_status,'Solved')
     'computeTargetDIH_DIHonly failed'
     keyboard
 end
-disp(sprintf('TEST ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
+disp(sprintf('computeTargetDIH_DIHonly TRAINING ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
 
 DIH_opt = exp(logDIH_opt) - 1;
 

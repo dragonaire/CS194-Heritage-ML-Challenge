@@ -27,39 +27,50 @@ toc
 %computeTargetDIH_constant;
 tic
 constants;
-NUM_PREDICTORS = 8;
-allDIH = zeros(NUM_TARGETS, NUM_PREDICTORS);
+allDIH = []; NUM_TARGETS = 0;
 
 target.DIH = computeTargetDIH_sexonly(target,logDIH);
-allDIH(:,1) = target.DIH;
-writeTarget('Target_1.csv',target);
+allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
 
 target.DIH = computeTargetDIH_ageonly(target,bins);
-allDIH(:,2) = target.DIH;
-writeTarget('Target_2.csv',target);
+allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
 
 target.DIH = computeTargetDIH_DIHonly(target,logDIH,members,true);
-allDIH(:,3) = target.DIH;
-writeTarget('Target_3.csv',target);
+allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
 
 target.DIH = computeTargetDIH_agesex(target,ages.yr3,genders.yr3,logDIH.yr3,bins);
-allDIH(:,4) = target.DIH;
-writeTarget('Target_4.csv',target);
+allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
 
-target.DIH = computeTargetDIH_agesexdrug(target,ages.yr3,genders.yr3,logDIH.yr3,drugs.features3_1yr,drugs.features4_1yr);
-allDIH(:,5) = target.DIH;
-writeTarget('Target_5.csv',target);
+target.DIH = computeTargetDIH_agesexdrug(target,ages.yr3,genders.yr3,...
+    logDIH.yr3,drugs.features3_1yr,drugs.features4_1yr);
+allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
 
-target.DIH = computeTargetDIH_agesexdruglab(target,ages,genders,logDIH,drugs,lab);
-allDIH(:,6) = target.DIH;
-writeTarget('Target_6.csv',target);
+target.DIH = computeTargetDIH_agesexdruglab(ages.yr3,genders.yr3,logDIH.yr3,...
+    target.ages,target.genders,drugs.features3_1yr,drugs.features4_1yr,...
+    lab.features3_1yr,lab.features4_1yr);
+allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
 
-target.DIH = computeTargetDIH_agesexdruglab_sqrt(target,ages,genders,logDIH,drugs,lab);
-allDIH(:,7) = target.DIH;
-writeTarget('Target_7.csv',target);
+target.DIH = computeTargetDIH_agesexdruglab_sqrt(ages.yr3,genders.yr3,logDIH.yr3,...
+    target.ages,target.genders,drugs.features3_1yr,drugs.features4_1yr,...
+    lab.features3_1yr,lab.features4_1yr);
+allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
+
+target.DIH = computeTargetDIH_agesexcombo_druglab(ages.yr3,genders.yr3,logDIH.yr3,...
+    target.ages,target.genders,drugs.features3_1yr,drugs.features4_1yr,...
+    lab.features3_1yr,lab.features4_1yr);
+allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
 
 %get median DIH for each member
 target.DIH = median(allDIH,2);
-writeTarget(sprintf('Target_%d.csv',NUM_PREDICTORS),target);
+allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
 toc
 'DONE!'

@@ -1,4 +1,5 @@
-function [target_DIH, params] = computeTargetDIH_agesexdrug(target,ages,genders,logDIH,drugs,drugs4)
+function [target_DIH, params] = computeTargetDIH_agesexdrug(target,ages,genders,logDIH,drugs,drugs_test)
+% Leaderboard Error: .476020
 % find optimal # of days for all trait bins
 %
 % sparse A: (# members) x (# trait bins)
@@ -10,13 +11,9 @@ offsets = [...
     length(BUCKET_RANGES.SEX),...
     length(BUCKET_RANGES.DRUG_1YR),...
     ];
-%TODO make sure these range from 1-length
-%M = [genders.yr3, ages.yr3, drugs.features3_1yr];
 offsets = cumsum(offsets);
 n = offsets(end);
 offsets = [0; offsets(1:end)'];
-%m = length(ages.yr3);
-%A = zeros(m,n);
 
 rows_i = [1:length(ages) 1:length(ages)];
 cols_i = [ages' (offsets(2)+genders)'];
@@ -33,12 +30,12 @@ if ~strcmp(cvx_status,'Solved')
     'computeTargetDIH_agesexdrug failed'
     keyboard
 end
-disp(sprintf('TEST ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
+disp(sprintf('computeTargetDIH_agesexdrug TRAINING ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
 
 c_age = c(offsets(1)+1:offsets(2));
 c_sex = c(offsets(2)+1:offsets(3));
 c_drugs = c(offsets(3)+1:offsets(4));
-target_DIH = c_age(target.ages) + c_sex(target.genders) + drugs4*c_drugs;
+target_DIH = c_age(target.ages) + c_sex(target.genders) + drugs_test*c_drugs;
 target_DIH = exp(target_DIH)-1;
 
 params = [c_age; c_sex; c_drugs];
