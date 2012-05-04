@@ -4,17 +4,22 @@ constants;
 if (bothyears) 
     total = length(logDIH.comb23);  
     logDIH23 = logDIH.comb23;
-    cvx_begin
+    cvx_begin quiet
         variables logDIH_opt(total, 1);
         minimize(norm(logDIH_opt - logDIH23));
     cvx_end
 else
     total = length(logDIH.yr3);  
-    cvx_begin
+    cvx_begin quiet
         variables logDIH_opt(total, 1);
         minimize(norm(logDIH_opt - logDIH.yr3));
     cvx_end
 end
+if ~strcmp(cvx_status,'Solved')
+    'computeTargetDIH_DIHonly failed'
+    keyboard
+end
+disp(sprintf('TEST ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
 
 DIH_opt = exp(logDIH_opt) - 1;
 

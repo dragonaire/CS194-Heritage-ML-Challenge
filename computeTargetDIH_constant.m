@@ -1,9 +1,14 @@
 function target_DIH = computeTargetDIH_constant(logDIH)
-cvx_begin
+cvx_begin quiet
     variables DIHc;
     minimize( norm([DIHc-logDIH.male; DIHc-logDIH.female; DIHc-logDIH.nosex]) )
 cvx_end
-DIHc = exp(DIHc)-1
+if ~strcmp(cvx_status,'Solved')
+    'computeTargetDIH_constant failed'
+    keyboard
+end
+disp(sprintf('TEST ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
 
+DIHc = exp(DIHc)-1
 target_DIH = DIHc*ones(length(target_memberids),1);
 end

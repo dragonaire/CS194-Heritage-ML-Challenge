@@ -25,14 +25,19 @@ nrows = length(ages);
 ncols = offsets(3);
 A = [full(sparse(rows_i, cols_i, val, nrows, ncols)), drugs];
 A=sparse(A);
-cvx_begin
+cvx_begin quiet
     variables c(n);
     minimize(norm(A*c - logDIH))
 cvx_end
+if ~strcmp(cvx_status,'Solved')
+    'computeTargetDIH_agesexdrug failed'
+    keyboard
+end
+disp(sprintf('TEST ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
 
-c_age = c(offsets(1)+1:offsets(2))
-c_sex = c(offsets(2)+1:offsets(3))
-c_drugs = c(offsets(3)+1:offsets(4))
+c_age = c(offsets(1)+1:offsets(2));
+c_sex = c(offsets(2)+1:offsets(3));
+c_drugs = c(offsets(3)+1:offsets(4));
 target_DIH = c_age(target.ages) + c_sex(target.genders) + drugs4*c_drugs;
 target_DIH = exp(target_DIH)-1;
 

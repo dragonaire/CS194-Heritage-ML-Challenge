@@ -27,7 +27,7 @@ toc
 %computeTargetDIH_constant;
 tic
 constants;
-NUM_PREDICTORS = 7;
+NUM_PREDICTORS = 8;
 allDIH = zeros(NUM_TARGETS, NUM_PREDICTORS);
 
 target.DIH = computeTargetDIH_sexonly(target,logDIH);
@@ -53,6 +53,10 @@ writeTarget('Target_5.csv',target);
 target.DIH = computeTargetDIH_agesexdruglab(target,ages,genders,logDIH,drugs,lab);
 allDIH(:,6) = target.DIH;
 writeTarget('Target_6.csv',target);
+
+target.DIH = computeTargetDIH_agesexdruglab_sqrt(target,ages,genders,logDIH,drugs,lab);
+allDIH(:,7) = target.DIH;
+writeTarget('Target_7.csv',target);
 
 %get median DIH for each member
 target.DIH = median(allDIH,2);

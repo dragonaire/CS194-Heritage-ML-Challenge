@@ -10,10 +10,15 @@ nrows = length(ages);
 ncols = num_bins;
 A = sparse(rows_i, cols_i, val, nrows, ncols);
 
-cvx_begin
+cvx_begin quiet
     variables c(num_bins);
     minimize(norm(A*c - logDIH))
 cvx_end
+if ~strcmp(cvx_status,'Solved')
+    'computeTargetDIH_agesex failed'
+    keyboard
+end
+disp(sprintf('TEST ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
 
 c_age = c(1:length(BUCKET_RANGES.AGE))
 c_sex = c(length(BUCKET_RANGES.AGE)+1:length(BUCKET_RANGES.AGE)+length(BUCKET_RANGES.SEX))

@@ -5,6 +5,12 @@ cvx_begin quiet
     variables DIHm DIHf DIHns;
     minimize( norm([DIHm-logDIH.male; DIHf-logDIH.female; DIHns-logDIH.nosex]) )
 cvx_end
+if ~strcmp(cvx_status,'Solved')
+    'computeTargetDIH_sexonly failed'
+    keyboard
+end
+disp(sprintf('computeTargetDIH_sexonly TEST ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
+
 DIHm = exp(DIHm)-1
 DIHf = exp(DIHf)-1
 DIHns = exp(DIHns)-1

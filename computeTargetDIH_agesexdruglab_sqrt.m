@@ -1,4 +1,4 @@
-function target_DIH = computeTargetDIH_agesexdruglab(target,ages,genders,logDIH,drugs,lab)
+function target_DIH = computeTargetDIH_agesexdruglab_sqrt(target,ages,genders,logDIH,drugs,lab)
 % find optimal # of days for all trait bins
 %
 % sparse A: (# members) x (# trait bins)
@@ -24,22 +24,23 @@ cols_i = [ages.yr3' (offsets(2)+genders.yr3)'];
 val = 1;
 nrows = length(ages.yr3);
 ncols = offsets(3);
-A = [full(sparse(rows_i, cols_i, val, nrows, ncols)), drugs.features3_1yr, lab.features3_1yr];
+A = [full(sparse(rows_i, cols_i, val, nrows, ncols)), ...
+    sqrt(drugs.features3_1yr), sqrt(lab.features3_1yr)];
 A=sparse(A);
 cvx_begin quiet
     variables c(n);
     minimize(norm(A*c - logDIH.yr3))
 cvx_end
 if ~strcmp(cvx_status,'Solved')
-    'computeTargetDIH_agesexdruglab failed'
+    'computeTargetDIH_agesexdruglab_sqrt failed'
     keyboard
 end
-disp(sprintf('TEST ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
+disp(sprintf('computeTargetDIH_agesexdruglab_sqrt TEST ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
 
-c_age = c(offsets(1)+1:offsets(2));
-c_sex = c(offsets(2)+1:offsets(3));
-c_drugs = c(offsets(3)+1:offsets(4));
-c_lab = c(offsets(4)+1:offsets(5));
+c_age = c(offsets(1)+1:offsets(2))
+c_sex = c(offsets(2)+1:offsets(3))
+c_drugs = c(offsets(3)+1:offsets(4))
+c_lab = c(offsets(4)+1:offsets(5))
 target_DIH = c_age(target.ages) + c_sex(target.genders) + drugs.features4_1yr*c_drugs + ...
     lab.features4_1yr*c_lab;
 target_DIH = exp(target_DIH)-1;
