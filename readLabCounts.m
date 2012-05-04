@@ -31,6 +31,10 @@ lab.features4_2yrs(lab.features4_2yrs<=0) = 0;
 lab.features4_2yrs = formFeaturesMatrix(lab.features4_2yrs, ...
     2*MAX_LAB_COUNT, target.memberids, lab.members);
 % just use past year
+lab.features2_1yr = MAX_LAB_COUNT*(lab.year-1)+lab.count;
+lab.features2_1yr(lab.features2_1yr>MAX_LAB_COUNT) = 0;
+lab.features2_1yr = formFeaturesMatrix(lab.features2_1yr, ...
+    MAX_LAB_COUNT, members.yr2, lab.members);
 lab.features3_1yr = MAX_LAB_COUNT*(lab.year-2)+lab.count;
 lab.features3_1yr(lab.features3_1yr>MAX_LAB_COUNT) = 0;
 lab.features3_1yr(lab.features3_1yr<=0) = 0;

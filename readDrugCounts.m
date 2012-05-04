@@ -31,6 +31,10 @@ drugs.features4_2yrs(drugs.features4_2yrs<=0) = 0;
 drugs.features4_2yrs = formFeaturesMatrix(drugs.features4_2yrs, ...
     2*MAX_DRUG_COUNT, target.memberids, drugs.members);
 % just use past year
+drugs.features2_1yr = MAX_DRUG_COUNT*(drugs.year-1)+drugs.count;
+drugs.features2_1yr(drugs.features2_1yr>MAX_DRUG_COUNT) = 0;
+drugs.features2_1yr = formFeaturesMatrix(drugs.features2_1yr, ...
+    MAX_DRUG_COUNT, members.yr2, drugs.members);
 drugs.features3_1yr = MAX_DRUG_COUNT*(drugs.year-2)+drugs.count;
 drugs.features3_1yr(drugs.features3_1yr>MAX_DRUG_COUNT) = 0;
 drugs.features3_1yr(drugs.features3_1yr<=0) = 0;

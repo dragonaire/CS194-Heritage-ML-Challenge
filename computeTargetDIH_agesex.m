@@ -1,4 +1,4 @@
-function [target_DIH, params] = computeTargetDIH_agesex(target,ages,genders,logDIH,bins)
+function [target_DIH, params] = computeTargetDIH_agesex(target,ages,genders,logDIH)
 % find optimal # of days for age and sex bins
 constants;
 num_bins = length(BUCKET_RANGES.AGE) + length(BUCKET_RANGES.SEX);
@@ -20,8 +20,8 @@ if ~strcmp(cvx_status,'Solved')
 end
 disp(sprintf('computeTargetDIH_agesex TRAINING ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
 
-c_age = c(1:length(BUCKET_RANGES.AGE))
-c_sex = c(length(BUCKET_RANGES.AGE)+1:length(BUCKET_RANGES.AGE)+length(BUCKET_RANGES.SEX))
+c_age = c(1:length(BUCKET_RANGES.AGE));
+c_sex = c(length(BUCKET_RANGES.AGE)+1:length(BUCKET_RANGES.AGE)+length(BUCKET_RANGES.SEX));
 target_DIH = c_age(target.ages) + c_sex(target.genders);
 target_DIH = exp(target_DIH)-1;
 

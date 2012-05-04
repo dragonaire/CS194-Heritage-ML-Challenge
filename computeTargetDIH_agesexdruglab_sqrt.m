@@ -35,10 +35,10 @@ if ~strcmp(cvx_status,'Solved')
 end
 disp(sprintf('computeTargetDIH_agesexdruglab_sqrt TRAINING ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
 
-c_age = c(offsets(1)+1:offsets(2))
-c_sex = c(offsets(2)+1:offsets(3))
-c_drugs = c(offsets(3)+1:offsets(4))
-c_lab = c(offsets(4)+1:offsets(5))
+c_age = c(offsets(1)+1:offsets(2));
+c_sex = c(offsets(2)+1:offsets(3));
+c_drugs = c(offsets(3)+1:offsets(4));
+c_lab = c(offsets(4)+1:offsets(5));
 target_DIH = c_age(ages_test) + c_sex(genders_test) + drugs_test*c_drugs + ...
     lab_test*c_lab;
 target_DIH = exp(target_DIH)-1;

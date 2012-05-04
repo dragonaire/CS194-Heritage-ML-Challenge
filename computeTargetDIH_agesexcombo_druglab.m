@@ -36,11 +36,11 @@ end
 disp(sprintf('computeTargetDIH_agesexcombo_druglab TRAINING ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
 
 c_agesex = c(offsets(1)+1:offsets(2));
-c_male = c_agesex(1:10)
-c_female = c_agesex(11:20)
-c_nosex = c_agesex(21:30)
-c_drugs = c(offsets(2)+1:offsets(3))
-c_lab = c(offsets(3)+1:offsets(4))
+c_male = c_agesex(1:10);
+c_female = c_agesex(11:20);
+c_nosex = c_agesex(21:30);
+c_drugs = c(offsets(2)+1:offsets(3));
+c_lab = c(offsets(3)+1:offsets(4));
 target_agesex = ages_test + 10*(genders_test-1);
 target_DIH = c_agesex(target_agesex) + drugs_test*c_drugs + ...
     lab_test*c_lab;

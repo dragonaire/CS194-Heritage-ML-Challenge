@@ -26,13 +26,20 @@ ages.yr2 = extractMemberTraits( members.all, members.yr2, ages.all);
 ages.yr3 = extractMemberTraits( members.all, members.yr3, ages.all);
 ages.comb23 = extractMemberTraits( members.all, members.comb23, ages.all);
 
-DIHmale = DIH.comb23(genders.comb23==MALE);
-DIHfemale = DIH.comb23(genders.comb23==FEMALE);
-DIHnosex = DIH.comb23(genders.comb23==NOSEX);
+DIHmale2 = DIH.yr2(genders.yr2==MALE);
+DIHfemale2 = DIH.yr2(genders.yr2==FEMALE);
+DIHnosex2 = DIH.yr2(genders.yr2==NOSEX);
+DIHmale3 = DIH.yr3(genders.yr3==MALE);
+DIHfemale3 = DIH.yr3(genders.yr3==FEMALE);
+DIHnosex3 = DIH.yr3(genders.yr3==NOSEX);
 
-logDIH.male = log(DIHmale+1);
-logDIH.female = log(DIHfemale+1);
-logDIH.nosex = log(DIHnosex+1);
+logDIH.genders.yr2.male = log(DIHmale2+1);
+logDIH.genders.yr2.female = log(DIHfemale2+1);
+logDIH.genders.yr2.nosex = log(DIHnosex2+1);
+logDIH.genders.yr3.male = log(DIHmale3+1);
+logDIH.genders.yr3.female = log(DIHfemale3+1);
+logDIH.genders.yr3.nosex = log(DIHnosex3+1);
+
 logDIH.comb23 = log(DIH.comb23+1);
 logDIH.yr2 = log(DIH.yr2+1);
 logDIH.yr3 = log(DIH.yr3+1);

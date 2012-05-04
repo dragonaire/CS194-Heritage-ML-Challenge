@@ -11,9 +11,9 @@ if ~strcmp(cvx_status,'Solved')
 end
 disp(sprintf('computeTargetDIH_sexonly TRAINING ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
 
-DIHm = exp(DIHm)-1
-DIHf = exp(DIHf)-1
-DIHns = exp(DIHns)-1
+DIHm = exp(DIHm)-1;
+DIHf = exp(DIHf)-1;
+DIHns = exp(DIHns)-1;
 
 target_DIH = 0.2.*ones(NUM_TARGETS,1);
 target_DIH(target.genders==MALE) = DIHm;
