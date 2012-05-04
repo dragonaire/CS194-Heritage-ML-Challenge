@@ -48,6 +48,13 @@ yr3_pred = computeTargetDIH_agesexcombo_druglab(ages.yr2,genders.yr2,logDIH.yr2,
 disp(sprintf('TEST ERROR %f',sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2))))
 all_yr3_pred = [all_yr3_pred, yr3_pred];
 
+yr3_pred = computeTargetDIH_agesexcombo_druglabcondproc(ages.yr2,genders.yr2,logDIH.yr2,...
+    fake_target.ages,fake_target.genders,drugs.features2_1yr,drugs.features3_1yr,...
+    lab.features2_1yr,lab.features3_1yr,claims.f2.condGroup,claims.f3.condGroup,...
+    claims.f2.procedure,claims.f3.procedure);
+disp(sprintf('TEST ERROR %f',sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2))))
+all_yr3_pred = [all_yr3_pred, yr3_pred];
+
 %get median DIH for each member
 yr3_pred = median(all_yr3_pred,2);
 disp('MEDIAN PREDICTOR');

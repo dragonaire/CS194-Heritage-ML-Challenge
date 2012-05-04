@@ -1,4 +1,4 @@
-function [ claims ] = readClaims()
+function [ claims ] = readClaims(target,members)
 try
     load('claims.mat');
     return;
@@ -74,7 +74,7 @@ length(find(claims.DSFS==0))
 length(find(claims.condGroup==0))
 length(find(claims.charlson==0))
 length(find(claims.procedure==0))
-checkArray(claims.year,BUCKET_RANGES.YEAR)
+checkArray(claims.year,1:SIZE.YEAR)
 
 % Split claims into years
 y1 = find(claims.year==1);
@@ -83,7 +83,10 @@ y3 = find(claims.year==3);
 claims.y1 = getClaimsForYear(claims,y1);
 claims.y2 = getClaimsForYear(claims,y2);
 claims.y3 = getClaimsForYear(claims,y3);
-
+% Calculate features for each year
+claims.f2 = getFeaturesForYear(claims.y1,members.yr2,claims.y1.members);
+claims.f3 = getFeaturesForYear(claims.y2,members.yr3,claims.y2.members);
+claims.f4 = getFeaturesForYear(claims.y3,target.memberids,claims.y3.members);
 save('claims.mat','claims');
 end
 function claimsForYear = getClaimsForYear(claims,yr)
@@ -100,4 +103,21 @@ claimsForYear.DSFS = claims.DSFS(yr);
 claimsForYear.condGroup = claims.condGroup(yr);
 claimsForYear.charlson = claims.charlson(yr);
 claimsForYear.procedure = claims.procedure(yr);
+end
+function featuresForYear = getFeaturesForYear(claimsForYear,target_members,year_members)
+constants
+%featuresForYear.members = formFeaturesMatrix(claimsForYear.members,SIZE.,target_members,year_members);
+%featuresForYear.provider = formFeaturesMatrix(claimsForYear.provider,SIZE.,target_members,year_members);
+%featuresForYear.vendor = formFeaturesMatrix(claimsForYear.vendor,SIZE.,target_members,year_members);
+%featuresForYear.pcp = formFeaturesMatrix(claimsForYear.pcp,SIZE.,target_members,year_members);
+featuresForYear.year = formFeaturesMatrix(claimsForYear.year,SIZE.YEAR,target_members,year_members);
+featuresForYear.specialty = formFeaturesMatrix(claimsForYear.specialty,SIZE.SPECIALTY,target_members,year_members);
+featuresForYear.place = formFeaturesMatrix(claimsForYear.place,SIZE.PLACE,target_members,year_members);
+featuresForYear.payDelay = formFeaturesMatrix(claimsForYear.payDelay,SIZE.PAY_DELAY,target_members,year_members);
+%TODO LoS might have some -1s in it
+%featuresForYear.LoS = formFeaturesMatrix(claimsForYear.LoS,SIZE.LoS,target_members,year_members);
+featuresForYear.DSFS = formFeaturesMatrix(claimsForYear.DSFS,SIZE.DSFS,target_members,year_members);
+featuresForYear.condGroup = formFeaturesMatrix(claimsForYear.condGroup,SIZE.COND_GROUP,target_members,year_members);
+featuresForYear.charlson = formFeaturesMatrix(claimsForYear.charlson,SIZE.CHARLSON,target_members,year_members);
+featuresForYear.procedure = formFeaturesMatrix(claimsForYear.procedure,SIZE.PROCEDURE,target_members,year_members);
 end

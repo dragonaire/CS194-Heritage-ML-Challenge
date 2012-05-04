@@ -1,7 +1,7 @@
 function target_DIH = computeTargetDIH_ageonly(target,bins)
 constants;
 % find optimal # of days for age bins
-num_bins = length(BUCKET_RANGES.AGE);
+num_bins = SIZE.AGE;
 cvx_begin quiet
     variables dih(num_bins,1);
     minimize(norm([dih(1)-bins.age{1};...
@@ -24,7 +24,7 @@ disp(sprintf('computeTargetDIH_ageonly TRAINING ERROR: %f',sqrt((cvx_optval^2)/N
 DIHages = exp(dih) - 1;
 
 target_DIH = 0.2.*ones(NUM_TARGETS,1);
-for i = BUCKET_RANGES.AGE
+for i = 1:SIZE.AGE
     target_DIH(target.ages == i) = DIHages(i);
 end
 %TODO: the last age bucket is for missing age. This could be throwing things off.

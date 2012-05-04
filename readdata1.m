@@ -10,7 +10,7 @@ toc
 lab = readLabCounts(target,members);
 toc
 %TODO organize claims by member
-claims = readClaims();
+claims = readClaims(target,members);
 
 %target.condGroup = extractMemberTraits(claim_members, target.memberids, condGroup);
 %target.proc = extractMemberTraits(claim_members, target.memberids, procedure);

@@ -40,6 +40,13 @@ target.DIH = computeTargetDIH_agesexcombo_druglab(ages.yr3,genders.yr3,logDIH.yr
 allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
 
+target.DIH = computeTargetDIH_agesexcombo_druglabcondproc(ages.yr3,genders.yr3,logDIH.yr3,...
+    target.ages,target.genders,drugs.features3_1yr,drugs.features4_1yr,...
+    lab.features3_1yr,lab.features4_1yr,claims.f3.condGroup,claims.f4.condGroup,...
+    claims.f3.procedure,claims.f4.procedure);
+allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
+
 %get median DIH for each member
 target.DIH = median(allDIH,2);
 allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;

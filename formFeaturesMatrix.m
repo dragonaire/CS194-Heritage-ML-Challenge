@@ -12,4 +12,5 @@ function features = formFeaturesMatrix(f, range, members, feature_members)
             end
         end
     end
+    features=sparse(features);
 end
