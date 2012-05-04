@@ -1,4 +1,10 @@
 function drugs = readDrugCounts(target,members)
+try
+    load('drugs.mat');
+    return;
+catch
+    'Drugs were not cached! This could take a few seconds.'
+end
 constants;
 fid = fopen('DrugCount.csv','rt');
 C = textscan(fid,'%f %s %s %s','Delimiter',',','CollectOutput',1);
@@ -34,4 +40,5 @@ drugs.features4_1yr = MAX_DRUG_COUNT*(drugs.year-3)+drugs.count;
 drugs.features4_1yr(drugs.features4_1yr<=0) = 0;
 drugs.features4_1yr = formFeaturesMatrix(drugs.features4_1yr, ...
     MAX_DRUG_COUNT, target.memberids, drugs.members);
+save('drugs.mat','drugs');
 end

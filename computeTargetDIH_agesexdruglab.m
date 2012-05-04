@@ -26,10 +26,14 @@ nrows = length(ages.yr3);
 ncols = offsets(3);
 A = [full(sparse(rows_i, cols_i, val, nrows, ncols)), drugs.features3_1yr, lab.features3_1yr];
 A=sparse(A);
-cvx_begin
+cvx_begin quiet
     variables c(n);
     minimize(norm(A*c - logDIH.yr3))
 cvx_end
+if ~strcmp(cvx_status,'Solved')
+    'computeTargetDIH_agesexdruglab failed'
+end
+disp(sprintf('TEST ERROR: %f',sqrt((cvx_optval^2)/m)))
 
 c_age = c(offsets(1)+1:offsets(2))
 c_sex = c(offsets(2)+1:offsets(3))

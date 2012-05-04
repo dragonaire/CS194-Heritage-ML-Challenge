@@ -1,4 +1,10 @@
 function lab = readLabCounts(target,members)
+try
+    load('lab.mat');
+    return;
+catch
+    'Lab counts were not cached! This could take a few seconds.'
+end
 constants;
 fid = fopen('LabCount.csv','rt');
 C = textscan(fid,'%f %s %s %s','Delimiter',',','CollectOutput',1);
@@ -34,4 +40,5 @@ lab.features4_1yr = MAX_LAB_COUNT*(lab.year-3)+lab.count;
 lab.features4_1yr(lab.features4_1yr<=0) = 0;
 lab.features4_1yr = formFeaturesMatrix(lab.features4_1yr, ...
     MAX_LAB_COUNT, target.memberids, lab.members);
+save('lab.mat','lab');
 end

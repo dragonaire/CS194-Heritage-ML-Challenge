@@ -6,6 +6,7 @@ try
 catch
     'Claims were not cached! This could take a few minutes.'
 end
+constants;
 fid = fopen('Claims.csv','rt');
 % ints: MemberID,ProviderID,Vendor,PCP
 % strings: Year,Specialty,PlaceSvc,PayDelay,LengthOfStay,
