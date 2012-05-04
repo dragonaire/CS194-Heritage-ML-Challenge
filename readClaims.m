@@ -1,5 +1,4 @@
-function [ members,provider,vendor,pcp,year,specialty,place,payDelay,LoS,...
-    DSFS,condGroup,charlson,procedure] = readClaims()
+function [ claims ] = readClaims()
 try
     load('claims.mat');
     return;
@@ -16,15 +15,16 @@ fid = fopen('Claims.csv','rt');
 %TODO change textscan to use the 'HeaderLines' param
 C = textscan(fid,'%f %f %f %f %s %s %s %s %s %s %s %s %s %f','Delimiter',',','CollectOutput',1);
 fclose(fid);
-[members, members_i] = sort(C{1}(:,1));
-provider = C{1}(members_i,2);
-vendor = C{1}(members_i,3);
-pcp = C{1}(members_i,4);
+[claims.members, members_i] = sort(C{1}(:,1));
+claims.members_i = members_i;
+claims.provider = C{1}(members_i,2);
+claims.vendor = C{1}(members_i,3);
+claims.pcp = C{1}(members_i,4);
 stringYear = C{2}(members_i,1);
-year = 1*strcmp(stringYear, 'Y1') + 2*strcmp(stringYear, 'Y2') + ...
+claims.year = 1*strcmp(stringYear, 'Y1') + 2*strcmp(stringYear, 'Y2') + ...
     3*strcmp(stringYear, 'Y3');
 stringSpecialty = C{2}(members_i,2);
-specialty = 1*strcmp(stringSpecialty,'Anesthesiology') + ...
+claims.specialty = 1*strcmp(stringSpecialty,'Anesthesiology') + ...
     2*strcmp(stringSpecialty,'Diagnostic Imaging') + ...
     3*strcmp(stringSpecialty,'Emergency') + ...
     4*strcmp(stringSpecialty,'General Practice') + ...
@@ -38,7 +38,7 @@ specialty = 1*strcmp(stringSpecialty,'Anesthesiology') + ...
     12*strcmp(stringSpecialty,'Other') + ...
     13*strcmp(stringSpecialty,'');
 stringPlace = C{2}(members_i,3);
-place = 1*strcmp(stringPlace,'') + ...
+claims.place = 1*strcmp(stringPlace,'') + ...
     2*strcmp(stringPlace,'Ambulance') + ...
     3*strcmp(stringPlace,'Home') + ...
     4*strcmp(stringPlace,'Inpatient Hospital') + ...
@@ -47,36 +47,57 @@ place = 1*strcmp(stringPlace,'') + ...
     7*strcmp(stringPlace,'Outpatient Hospital') + ...
     8*strcmp(stringPlace,'Urgent Care') + ...
     9*strcmp(stringPlace,'Other');
-payDelay = str2double(C{2}(members_i,4));
-payDelay(isnan(payDelay)) = 162; % for replacing 162+ with 162
-LoS = str2double(C{2}(members_i,5));
-LoS(find(C{3}==0)) = -1;
-LoS(isnan(LoS)) = 26; % for replacing 26+ with 26
-DSFS = parseMonthCounts(C{2}(members_i,6));
+claims.payDelay = str2double(C{2}(members_i,4));
+claims.payDelay(isnan(claims.payDelay)) = 162; % for replacing 162+ with 162
+claims.LoS = str2double(C{2}(members_i,5));
+claims.LoS(find(C{3}==0)) = -1;%TODO can't have -1s running around
+claims.LoS(isnan(claims.LoS)) = 26; % for replacing 26+ with 26
+claims.DSFS = parseMonthCounts(C{2}(members_i,6));
 stringCondGroup = C{2}(members_i,7);
-condGroup = parseConditionGroup(stringCondGroup);
+claims.condGroup = parseConditionGroup(stringCondGroup);
 stringCharlson = C{2}(members_i,8);
-charlson = 1*strcmp(stringCharlson,'0') + ...
+claims.charlson = 1*strcmp(stringCharlson,'0') + ...
     2*strcmp(stringCharlson,'1-2') + ...
     3*strcmp(stringCharlson,'2-3') + ...
     4*strcmp(stringCharlson,'3-4') + ...
     5*strcmp(stringCharlson,'5+');
 stringProcGroup = C{2}(members_i,9);
-procedure = parseProcedureGroups(stringProcGroup);
+claims.procedure = parseProcedureGroups(stringProcGroup);
 
 %check that parsing went as planned
 'Errors?'
-length(find(year==0))
-length(find(specialty==0))
-length(find(place==0))
-sum(LoS==0)
-length(find(DSFS==0))
-length(find(condGroup==0))
-length(find(charlson==0))
-length(find(procedure==0))
-checkArray(year,BUCKET_RANGES.YEAR)
+length(find(claims.year==0))
+length(find(claims.specialty==0))
+length(find(claims.place==0))
+sum(claims.LoS==0)
+length(find(claims.DSFS==0))
+length(find(claims.condGroup==0))
+length(find(claims.charlson==0))
+length(find(claims.procedure==0))
+checkArray(claims.year,BUCKET_RANGES.YEAR)
 
-save('claims.mat','members','provider','vendor','pcp','year','specialty',...
-    'place','payDelay','LoS','DSFS','condGroup','charlson','procedure');
+% Split claims into years
+y1 = find(claims.year==1);
+y2 = find(claims.year==2);
+y3 = find(claims.year==3);
+claims.y1 = getClaimsForYear(claims,y1);
+claims.y2 = getClaimsForYear(claims,y2);
+claims.y3 = getClaimsForYear(claims,y3);
+
+save('claims.mat','claims');
 end
-
+function claimsForYear = getClaimsForYear(claims,yr)
+claimsForYear.members = claims.members(yr);
+claimsForYear.provider = claims.provider(yr);
+claimsForYear.vendor = claims.vendor(yr);
+claimsForYear.pcp = claims.pcp(yr);
+claimsForYear.year = claims.year(yr);
+claimsForYear.specialty = claims.specialty(yr);
+claimsForYear.place = claims.place(yr);
+claimsForYear.payDelay = claims.payDelay(yr);
+claimsForYear.LoS = claims.LoS(yr);
+claimsForYear.DSFS = claims.DSFS(yr);
+claimsForYear.condGroup = claims.condGroup(yr);
+claimsForYear.charlson = claims.charlson(yr);
+claimsForYear.procedure = claims.procedure(yr);
+end

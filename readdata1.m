@@ -10,8 +10,7 @@ toc
 lab = readLabCounts(target,members);
 toc
 %TODO organize claims by member
-[ claim_members,provider,vendor,pcp,year,specialty,place,payDelay,LoS,...
-    DSFS,condGroup,charlson,procedure] = readClaims();
+claims = readClaims();
 
 %target.condGroup = extractMemberTraits(claim_members, target.memberids, condGroup);
 %target.proc = extractMemberTraits(claim_members, target.memberids, procedure);
