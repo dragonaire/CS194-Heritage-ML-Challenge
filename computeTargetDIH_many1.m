@@ -3,8 +3,9 @@ function [target_DIH c] = computeTargetDIH_many1(ages,genders,logDIH,...
     proc_train,proc_test,los_train,los_test,charlson_train,charlson_test,...
     spec_train,spec_test,place_train,place_test, test)
 
+constants;
 try
-    load('test.mat');
+    load('many1.mat');
 catch
     offsets = [...
         SIZE.AGE*SIZE.SEX,...
@@ -59,7 +60,7 @@ catch
             %c(offsets(3:end)) == 0;
             c(112:138) == 0; % for not using los
             %Charlson*c(139:143) <= 0; % charlson index is of increasing badness
-            c(139:143) == 0; % for not using charlson index
+            %c(139:143) == 0; % for not using charlson index
             %c(144:156) == 0; % for not using specialty
             %c(157:165) == 0; % for not using place
             %c(111) == 0;
@@ -86,7 +87,7 @@ catch
     agesex_test = sparse(1:length(ages_test), agesex_test, 1, length(ages_test), SIZE.AGE*SIZE.SEX);
     M = sparse([agesex_test,drugs_test,lab_test,cond_test,proc_test,los_test,charlson_test,...
         spec_test,place_test]);
-    save('test.mat','A','c','M');
+    save('many1.mat','A','c','M');
 end
 %keyboard
 c = hillClimb(A,c,logDIH,test,M);
@@ -115,6 +116,8 @@ x = x.^3.5;
 %x(:,27) = min(1,x(:,27));
 end
 function x = charlsonMap(x)
+x = x.^1.1;
+%x = sqrt(x);
 %x = log(x+1);
 end
 function x = specMap(x)
@@ -127,12 +130,12 @@ x = log(x+0.4);
 end
 function c = hillClimb(A,c,logDIH,test,M)
 constants;
-STEP = 0.00005;
+STEP = 0.000025;
 OVERFIT = 0.65;
 indices = [1:111,144:165];
 v = A*c;
 old = norm(max(max(v,MIN_PREDICTION)-logDIH,OVERFIT));
-for iter=1:6
+for iter=1:14
     change = false;
     for i=indices
         %TODO should be 
