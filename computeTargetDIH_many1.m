@@ -2,10 +2,13 @@ function [target_DIH c] = computeTargetDIH_many1(ages,genders,logDIH,...
     ages_test,genders_test,drugs_train,drugs_test,lab_train,lab_test,cond_train,cond_test,...
     proc_train,proc_test,los_train,los_test,charlson_train,charlson_test,...
     spec_train,spec_test,place_train,place_test, test)
-
+if nargin < 22
+    test = zeros(length(place_test),1);
+end
 constants;
 try
-    load('many1.mat');
+    load('alkjsdfdsal');
+    %load('many1.mat');
 catch
     offsets = [...
         SIZE.AGE*SIZE.SEX,...
@@ -80,7 +83,7 @@ catch
     c_cond = c(offsets(4)+1:offsets(5));
     c_proc = c(offsets(5)+1:offsets(6));
     c_los = c(offsets(6)+1:offsets(7));
-    c_charlson = c(offsets(7)+1:offsets(8))
+    c_charlson = c(offsets(7)+1:offsets(8));
     c_spec = c(offsets(8)+1:offsets(9));
     c_place = c(offsets(9)+1:offsets(10));
 
@@ -88,7 +91,7 @@ catch
     agesex_test = sparse(1:length(ages_test), agesex_test, 1, length(ages_test), SIZE.AGE*SIZE.SEX);
     M = sparse([agesex_test,drugs_test,lab_test,cond_test,proc_test,los_test,charlson_test,...
         spec_test,place_test]);
-    save('many1.mat','A','c','M');
+    %save('many1.mat','A','c','M');
 end
 %keyboard
 c = hillClimb(A,c,logDIH,test,M);
@@ -161,8 +164,9 @@ for iter=1:13
     if ~change
         break
     end
-    disp(sprintf('%d: train: %f, test: %f',iter,sqrt(mean((max(A*c,MIN_PREDICTION)-logDIH).^2)),...
-        sqrt(mean((max(M*c,MIN_PREDICTION)-test).^2))));
+    vtrain = sqrt(mean((max(A*c,MIN_PREDICTION)-logDIH).^2));
+    vtest = sqrt(mean((max(M*c,MIN_PREDICTION)-test).^2));
+    %disp(sprintf('%d: index %d, train: %f, test: %f',iter,i,vtrain,vtest));
 end
 end
 function c = hillClimb2(A,c,logDIH,test,M)
@@ -198,7 +202,8 @@ for iter=1:100
     c(i) = c(i) + step(i);
     v = v + step(i)*A(:,i);
     old = val(i);
-    disp(sprintf('%d: index %d, train: %f, test: %f',iter,i,...
-        sqrt(mean((max(A*c,MIN_PREDICTION)-logDIH).^2)),sqrt(mean((max(M*c,MIN_PREDICTION)-test).^2))));
+    vtrain = sqrt(mean((max(A*c,MIN_PREDICTION)-logDIH).^2));
+    vtest = sqrt(mean((max(M*c,MIN_PREDICTION)-test).^2));
+    disp(sprintf('%d: index %d, train: %f, test: %f',iter,i,vtrain,vtest));
 end
 end
