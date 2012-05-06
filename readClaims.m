@@ -50,7 +50,8 @@ claims.place = 1*strcmp(stringPlace,'') + ...
 claims.payDelay = str2double(C{2}(members_i,4));
 claims.payDelay(isnan(claims.payDelay)) = 162; % for replacing 162+ with 162
 claims.LoS = str2double(C{2}(members_i,5));
-claims.LoS(find(C{3}==0)) = -1;%TODO can't have -1s running around
+%TODO will have to change this 27 if we treat LoS as a continuous variable
+claims.LoS(find(C{3}==0)) = 27;
 claims.LoS(isnan(claims.LoS)) = 26; % for replacing 26+ with 26
 claims.DSFS = parseMonthCounts(C{2}(members_i,6));
 stringCondGroup = C{2}(members_i,7);
@@ -110,13 +111,12 @@ constants
 %featuresForYear.provider = formFeaturesMatrix(claimsForYear.provider,SIZE.,target_members,year_members);
 %featuresForYear.vendor = formFeaturesMatrix(claimsForYear.vendor,SIZE.,target_members,year_members);
 %featuresForYear.pcp = formFeaturesMatrix(claimsForYear.pcp,SIZE.,target_members,year_members);
-featuresForYear.year = formFeaturesMatrix(claimsForYear.year,SIZE.YEAR,target_members,year_members);
+%featuresForYear.year = formFeaturesMatrix(claimsForYear.year,SIZE.YEAR,target_members,year_members);
 featuresForYear.specialty = formFeaturesMatrix(claimsForYear.specialty,SIZE.SPECIALTY,target_members,year_members);
 featuresForYear.place = formFeaturesMatrix(claimsForYear.place,SIZE.PLACE,target_members,year_members);
 featuresForYear.payDelay = formFeaturesMatrix(claimsForYear.payDelay,SIZE.PAY_DELAY,target_members,year_members);
-%TODO LoS might have some -1s in it
-%featuresForYear.LoS = formFeaturesMatrix(claimsForYear.LoS,SIZE.LoS,target_members,year_members);
-featuresForYear.DSFS = formFeaturesMatrix(claimsForYear.DSFS,SIZE.DSFS,target_members,year_members);
+featuresForYear.LoS = formFeaturesMatrix(claimsForYear.LoS,SIZE.LoS,target_members,year_members);
+%featuresForYear.DSFS = formFeaturesMatrix(claimsForYear.DSFS,SIZE.DSFS,target_members,year_members);
 featuresForYear.condGroup = formFeaturesMatrix(claimsForYear.condGroup,SIZE.COND_GROUP,target_members,year_members);
 featuresForYear.charlson = formFeaturesMatrix(claimsForYear.charlson,SIZE.CHARLSON,target_members,year_members);
 featuresForYear.procedure = formFeaturesMatrix(claimsForYear.procedure,SIZE.PROCEDURE,target_members,year_members);
