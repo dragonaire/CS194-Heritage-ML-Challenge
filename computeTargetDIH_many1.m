@@ -59,7 +59,8 @@ catch
             %c(31:end) >= 0;
             %c(offsets(3:end)) == 0;
             c(112:138) == 0; % for not using los
-            %Charlson*c(139:143) <= 0; % charlson index is of increasing badness
+            Charlson*c(139:143) <= 0; % charlson index is of increasing badness
+            %c(144:165) >= 0; Should this be a requirement?
             %c(139:143) == 0; % for not using charlson index
             %c(144:156) == 0; % for not using specialty
             %c(157:165) == 0; % for not using place
@@ -79,7 +80,7 @@ catch
     c_cond = c(offsets(4)+1:offsets(5));
     c_proc = c(offsets(5)+1:offsets(6));
     c_los = c(offsets(6)+1:offsets(7));
-    c_charlson = c(offsets(7)+1:offsets(8));
+    c_charlson = c(offsets(7)+1:offsets(8))
     c_spec = c(offsets(8)+1:offsets(9));
     c_place = c(offsets(9)+1:offsets(10));
 
@@ -135,7 +136,7 @@ OVERFIT = 0.65;
 indices = [1:111,144:165];
 v = A*c;
 old = norm(max(max(v,MIN_PREDICTION)-logDIH,OVERFIT));
-for iter=1:14
+for iter=1:13
     change = false;
     for i=indices
         %TODO should be 
