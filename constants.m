@@ -1,7 +1,7 @@
 NUM_TARGETS = 70942;
 NUM_TRAINING = 113000;
-MIN_PREDICTION = 0.001; %TODO find a better way to choose this constant
-MAX_PREDICTION = 14.9; %TODO find a better way to choose this constant
+MIN_PREDICTION = 0.057; %TODO find a better way to choose this constant
+MAX_PREDICTION = 14.0; %TODO find a better way to choose this constant
 
 MAXPAYDELAY = 162;
 % 1 for male, 2 for female, 0 for no sex
