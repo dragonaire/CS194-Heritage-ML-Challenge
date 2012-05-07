@@ -1,10 +1,7 @@
 function [target_DIH c] = computeTargetDIH_many1(ages,genders,logDIH,...
     ages_test,genders_test,drugs_train,drugs_test,lab_train,lab_test,cond_train,cond_test,...
     proc_train,proc_test,los_train,los_test,charlson_train,charlson_test,...
-    spec_train,spec_test,place_train,place_test, test)
-if nargin < 22
-    test = zeros(length(place_test),1);
-end
+    spec_train,spec_test,place_train,place_test)
 constants;
 try
     load('alkjsdfdsal');
@@ -54,15 +51,18 @@ catch
         drugs_train, lab_train, cond_train, proc_train, los_train, charlson_train,...
         spec_train, place_train];
     A=sparse(A);
-    Charlson = -diag(ones(4,1),1)+eye(5);
+    LosMatrix = -diag(ones(SIZE.LoS-3,1),1)+eye(SIZE.LoS-2);
+    Charlson = -diag(ones(SIZE.CHARLSON-1,1),1)+eye(SIZE.CHARLSON);
     cvx_begin quiet
         variables c(n);
         minimize(norm(A*c - logDIH))
         subject to
             %c(31:end) >= 0;
             %c(offsets(3:end)) == 0;
-            c(112:138) == 0; % for not using los
-            Charlson*c(139:143) <= 0; % charlson index is of increasing badness
+            %c(112:125) == 0; % for not using los
+            % LoS is of increasing badness. except for last 2 columns which had missing data
+            %LosMatrix*c(112:123) <= 0;
+            Charlson*c(126:130) <= 0; % charlson index is of increasing badness
             %c(144:165) >= 0; Should this be a requirement?
             %c(139:143) == 0; % for not using charlson index
             %c(144:156) == 0; % for not using specialty
@@ -94,49 +94,50 @@ catch
     %save('many1.mat','A','c','M');
 end
 %keyboard
-c = hillClimb(A,c,logDIH,test,M);
+c = hillClimb3(A,c,logDIH);
 target_DIH = M*c;
 target_DIH = exp(target_DIH)-1;
 end
 %TODO these functions make the arrays unsparse. Subtract the min value to
 %make them sparse again
 function x = condMap(x)
-x = log(x+3.5);
+x = sparse(log(x+3.5)-log(3.5));
 end
 function x = procMap(x)
-x = log(x+0.4);
+x = sparse(log(x+0.4)-log(0.4));
 end
 function x = drugMap(x)
-x = log(x+0.5);
+x = sparse(log(x+0.5)-log(0.5));
 %x = log(sqrt(x)+6);
 %x = sqrt(x);
 end
 function x = labMap(x)
-x = x.^1.1;
+x = sparse(x.^1.1);
 end
 function x = losMap(x)
-x = x.^3.5;
+x = sparse(x.^0.4);%TODO adjust this
+%x = sparse(x.^3.5);
 %x = sqrt(x);
 %x(:,27) = min(1,x(:,27));
 end
 function x = charlsonMap(x)
-x = x.^1.1;
+x = sparse(x.^1.1);
 %x = sqrt(x);
 %x = log(x+1);
 end
 function x = specMap(x)
 %x = sqrt(x);
-x = x.^0.79;
+x = sparse(x.^0.79);
 end
 function x = placeMap(x)
 %x = sqrt(x);
-x = log(x+0.4);
+x = sparse(log(x+0.4)-log(0.4));
 end
-function c = hillClimb(A,c,logDIH,test,M)
+function c = hillClimb(A,c,logDIH)
 constants;
 STEP = 0.000025;
 OVERFIT = 0.65;
-indices = [1:111,144:165];
+indices = [1:111,126:152];
 v = A*c;
 old = norm(max(max(v,MIN_PREDICTION)-logDIH,OVERFIT));
 for iter=1:13
@@ -165,45 +166,78 @@ for iter=1:13
         break
     end
     vtrain = sqrt(mean((max(A*c,MIN_PREDICTION)-logDIH).^2));
-    vtest = sqrt(mean((max(M*c,MIN_PREDICTION)-test).^2));
-    %disp(sprintf('%d: index %d, train: %f, test: %f',iter,i,vtrain,vtest));
+    %disp(sprintf('%d: index %d, train: %f',iter,i,vtrain));
 end
 end
-function c = hillClimb2(A,c,logDIH,test,M)
+function c = hillClimb2(A,c,logDIH)
 constants;
-STEP = 0.0001;
-OVERFIT = 0.65;
-indices = [1:111,144:165];
-disp(sprintf('0: train: %f, test: %f',sqrt(mean((max(A*c,MIN_PREDICTION)-logDIH).^2)),...
-    sqrt(mean((max(M*c,MIN_PREDICTION)-test).^2))));
+STEP = 0.0005;
+GRAD = 1;
+OVERFIT = 0;%0.65;
+%indices = [1:111,126:152];
+indices = 1:152;
+disp(sprintf('0: train: %f',sqrt(mean((max(A*c,MIN_PREDICTION)-logDIH).^2))));
 v = A*c;
-old = norm(max(max(v,MIN_PREDICTION)-logDIH,OVERFIT));
 for iter=1:100
+    old = norm(max(abs(max(v,MIN_PREDICTION)-logDIH),OVERFIT));
     step = zeros(size(c));
-    val = old*ones(size(c));
     for i=indices
         %TODO should be 
         % norm(max(abs(max(A*c,MIN_PREDICTION)-logDIH),OVERFIT));
         % for some reason the abs is detrimental
-        new1 = norm(max(max(v + STEP*A(:,i),MIN_PREDICTION)-logDIH,OVERFIT));
-        new2 = norm(max(max(v - STEP*A(:,i),MIN_PREDICTION)-logDIH,OVERFIT));
+        new1 = norm(max(abs(max(v + STEP*A(:,i),MIN_PREDICTION)-logDIH),OVERFIT));
+        new2 = norm(max(abs(max(v - STEP*A(:,i),MIN_PREDICTION)-logDIH),OVERFIT));
         if new1 < old && new1 < new2
-            step(i) = STEP;
-            val(i) = new1;
+            step(i) = old-new1;
         elseif new2 < old && new2 < new1
-            step(i) = -STEP;
-            val(i) = new2;
+            step(i) = -(old-new2);
         end 
     end
-    [m,i]=min(val);
-    if step(i)==0
+    if step==0
+        break;
+    end
+    step = step/norm(step);
+    c = c + STEP*step;
+    v = A*c;
+    %c(i) = c(i) + step(i);
+    %v = v + step(i)*A(:,i);
+    %old = val(i);
+    %old_vtrain = vtrain;
+    vtrain = sqrt(mean((max(A*c,MIN_PREDICTION)-logDIH).^2));
+    %disp(sprintf('%d: index %d, train: %f, steplen: %f',iter,i,vtrain,STEP));
+end
+end
+function c = hillClimb3(A,c,logDIH)
+constants;
+STEP = 0.000025;
+OVERFIT = 0.0;%0.65;
+%indices = [1:111,126:152];
+indices = 1:152;
+v = A*c;
+old = norm(max(abs(max(v,MIN_PREDICTION)-logDIH),OVERFIT));
+for iter=1:100
+    change = 0;
+    for i=indices
+        v1 = v + STEP*A(:,i);
+        new1 = norm(max(abs(max(v1,MIN_PREDICTION)-logDIH),OVERFIT));
+        v2 = v - STEP*A(:,i);
+        new2 = norm(max(abs(max(v2,MIN_PREDICTION)-logDIH),OVERFIT));
+        if new1 < old && new1 < new2
+            change=old-new1;
+            c(i) = c(i) + STEP;
+            v=v1;
+            old=new1;
+        elseif new2 < old && new2 < new1
+            change=old-new1;
+            c(i) = c(i) - STEP;
+            v=v2;
+            old=new2;
+        end 
+    end
+    if change <= 0
         break
     end
-    c(i) = c(i) + step(i);
-    v = v + step(i)*A(:,i);
-    old = val(i);
     vtrain = sqrt(mean((max(A*c,MIN_PREDICTION)-logDIH).^2));
-    vtest = sqrt(mean((max(M*c,MIN_PREDICTION)-test).^2));
-    disp(sprintf('%d: index %d, train: %f, test: %f',iter,i,vtrain,vtest));
+    %disp(sprintf('%d: index %d, train: %f',iter,i,vtrain,));
 end
 end

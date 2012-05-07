@@ -3,7 +3,7 @@ try
     load('claims.mat');
     return;
 catch
-    'Claims were not cached! This could take a few minutes.'
+    disp('Claims were not cached! This could take a few minutes.');
 end
 constants;
 fid = fopen('Claims.csv','rt');
@@ -21,8 +21,9 @@ claims.provider = C{1}(members_i,2);
 claims.vendor = C{1}(members_i,3);
 claims.pcp = C{1}(members_i,4);
 stringYear = C{2}(members_i,1);
-claims.year = 1*strcmp(stringYear, 'Y1') + 2*strcmp(stringYear, 'Y2') + ...
+claims_year = 1*strcmp(stringYear, 'Y1') + 2*strcmp(stringYear, 'Y2') + ...
     3*strcmp(stringYear, 'Y3');
+clear stringYear;
 stringSpecialty = C{2}(members_i,2);
 claims.specialty = 1*strcmp(stringSpecialty,'Anesthesiology') + ...
     2*strcmp(stringSpecialty,'Diagnostic Imaging') + ...
@@ -37,6 +38,7 @@ claims.specialty = 1*strcmp(stringSpecialty,'Anesthesiology') + ...
     11*strcmp(stringSpecialty,'Surgery') + ...
     12*strcmp(stringSpecialty,'Other') + ...
     13*strcmp(stringSpecialty,'');
+clear stringSpecialty;
 stringPlace = C{2}(members_i,3);
 claims.place = 1*strcmp(stringPlace,'') + ...
     2*strcmp(stringPlace,'Ambulance') + ...
@@ -49,10 +51,21 @@ claims.place = 1*strcmp(stringPlace,'') + ...
     9*strcmp(stringPlace,'Other');
 claims.payDelay = str2double(C{2}(members_i,4));
 claims.payDelay(isnan(claims.payDelay)) = 162; % for replacing 162+ with 162
-claims.LoS = str2double(C{2}(members_i,5));
-%TODO will have to change this 27 if we treat LoS as a continuous variable
-claims.LoS(find(C{3}==0)) = 27;
-claims.LoS(isnan(claims.LoS)) = 26; % for replacing 26+ with 26
+stringLoS = C{2}(members_i,5);
+claims.LoS = 1*strcmp(stringLoS,'1 day') + ...
+    2*strcmp(stringLoS,'2 days') + ...
+    3*strcmp(stringLoS,'3 days') + ...
+    4*strcmp(stringLoS,'4 days') + ...
+    5*strcmp(stringLoS,'5 days') + ...
+    6*strcmp(stringLoS,'6 days') + ...
+    7*strcmp(stringLoS,'1- 2 weeks') + ...
+    8*strcmp(stringLoS,'2- 4 weeks') + ...
+    9*strcmp(stringLoS,'4- 8 weeks') + ...
+    10*strcmp(stringLoS,'8- 12 weeks') + ...
+    11*strcmp(stringLoS,'12- 26 weeks') + ...
+    12*strcmp(stringLoS,'26+ weeks') + ...
+    13*strcmp(stringLoS,'');
+claims.LoS(C{3}(members_i)==1) = 14;
 claims.DSFS = parseMonthCounts(C{2}(members_i,6));
 stringCondGroup = C{2}(members_i,7);
 claims.condGroup = parseConditionGroup(stringCondGroup);
@@ -67,7 +80,7 @@ claims.procedure = parseProcedureGroups(stringProcGroup);
 
 %check that parsing went as planned
 'Errors?'
-length(find(claims.year==0))
+length(find(claims_year==0))
 length(find(claims.specialty==0))
 length(find(claims.place==0))
 sum(claims.LoS==0)
@@ -75,19 +88,19 @@ length(find(claims.DSFS==0))
 length(find(claims.condGroup==0))
 length(find(claims.charlson==0))
 length(find(claims.procedure==0))
-checkArray(claims.year,1:SIZE.YEAR)
+checkArray(claims_year,1:SIZE.YEAR)
 
 % Split claims into years
-y1 = find(claims.year==1);
-y2 = find(claims.year==2);
-y3 = find(claims.year==3);
-claims.y1 = getClaimsForYear(claims,y1);
-claims.y2 = getClaimsForYear(claims,y2);
-claims.y3 = getClaimsForYear(claims,y3);
+y1 = find(claims_year==1);
+y2 = find(claims_year==2);
+y3 = find(claims_year==3);
+claims_y1 = getClaimsForYear(claims,y1);
+claims_y2 = getClaimsForYear(claims,y2);
+claims_y3 = getClaimsForYear(claims,y3);
 % Calculate features for each year
-claims.f2 = getFeaturesForYear(claims.y1,members.yr2,claims.y1.members);
-claims.f3 = getFeaturesForYear(claims.y2,members.yr3,claims.y2.members);
-claims.f4 = getFeaturesForYear(claims.y3,target.memberids,claims.y3.members);
+claims.f2 = getFeaturesForYear(claims_y1,members.yr2,claims_y1.members);
+claims.f3 = getFeaturesForYear(claims_y2,members.yr3,claims_y2.members);
+claims.f4 = getFeaturesForYear(claims_y3,target.memberids,claims_y3.members);
 save('claims.mat','claims');
 end
 function claimsForYear = getClaimsForYear(claims,yr)
@@ -95,7 +108,7 @@ claimsForYear.members = claims.members(yr);
 claimsForYear.provider = claims.provider(yr);
 claimsForYear.vendor = claims.vendor(yr);
 claimsForYear.pcp = claims.pcp(yr);
-claimsForYear.year = claims.year(yr);
+%claimsForYear.year = claims.year(yr);
 claimsForYear.specialty = claims.specialty(yr);
 claimsForYear.place = claims.place(yr);
 claimsForYear.payDelay = claims.payDelay(yr);

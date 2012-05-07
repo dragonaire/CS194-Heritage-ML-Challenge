@@ -3,7 +3,7 @@ try
     load('lab.mat');
     return;
 catch
-    'Lab counts were not cached! This could take a few seconds.'
+    disp('Lab counts were not cached! This could take a few seconds.');
 end
 constants;
 fid = fopen('LabCount.csv','rt');

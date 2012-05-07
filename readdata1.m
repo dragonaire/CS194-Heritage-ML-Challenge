@@ -5,16 +5,15 @@ tic
 bins = extractBins(DIH,genders,ages);
 target = readTarget(members, genders, ages);
 toc
+claims = readClaims(target,members);
+toc
 drugs = readDrugCounts(target,members);
 toc
 lab = readLabCounts(target,members);
 toc
-%TODO organize claims by member
-claims = readClaims(target,members);
 
 %target.condGroup = extractMemberTraits(claim_members, target.memberids, condGroup);
 %target.proc = extractMemberTraits(claim_members, target.memberids, procedure);
-toc
 
 %TODO clean up member numbers to be in the range 1-113000 and keep a
 %mapping back to original numbers

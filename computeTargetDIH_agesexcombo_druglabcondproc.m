@@ -78,5 +78,5 @@ x = log(x+0.5);
 %x = sqrt(x);
 end
 function x = labMap(x)
-x = x.^1.1;
+x = sparse(x.^1.1);
 end
