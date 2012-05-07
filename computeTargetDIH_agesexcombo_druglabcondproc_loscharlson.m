@@ -56,7 +56,7 @@ if ~strcmp(cvx_status,'Solved')
     'computeTargetDIH_agesexcombo_druglabcondproc_loscharlson failed'
     keyboard
 end
-disp(sprintf('computeTargetDIH_agesexcombo_druglabcondproc_loscharlson TRAINING ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
+disp(sprintf('agesexcombo_druglabcondproc_loscharlson TRAINING ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
 
 c_agesex = c(offsets(1)+1:offsets(2));
 c_drugs = c(offsets(2)+1:offsets(3));
@@ -74,21 +74,25 @@ end
 %TODO these functions make the arrays unsparse. Subtract the min value to
 %make them sparse again
 function x = condMap(x)
-x = log(x+3.5);
+c=1.75;
+x = sparse(log(x+c)-log(c));
 end
 function x = procMap(x)
-x = log(x+0.4);
+c=1.1;
+x = sparse(log(x+c)-log(c));
 end
 function x = drugMap(x)
-x = log(x+0.5);
+c=0.5;
+x = sparse(log(x+c)-log(c));
 %x = log(sqrt(x)+6);
 %x = sqrt(x);
 end
 function x = labMap(x)
-x = x.^1.1;
+x = sparse(x.^0.9);
 end
 function x = losMap(x)
-x = x.^3.5;
+x = sparse(x.^0.78);
+%x = x.^3.5;
 %x = sqrt(x);
 %x(:,27) = min(1,x(:,27));
 end

@@ -63,13 +63,7 @@ catch
             % LoS is of increasing badness. except for last 2 columns which had missing data
             %LosMatrix*c(112:123) <= 0;
             Charlson*c(126:130) <= 0; % charlson index is of increasing badness
-            %c(144:165) >= 0; Should this be a requirement?
-            %c(139:143) == 0; % for not using charlson index
-            %c(144:156) == 0; % for not using specialty
-            %c(157:165) == 0; % for not using place
-            %c(111) == 0;
-            %c(156) == 0;
-            %c(160:164) == 0; %TODO randomly setting some to 0, because of overfitting
+            c(126:130) == 0; % for not using charlson index
     cvx_end
     if ~strcmp(cvx_status,'Solved') && ~strcmp(cvx_status,'Inaccurate/Solved')
         'computeTargetDIH_many1 failed'
@@ -101,10 +95,12 @@ end
 %TODO these functions make the arrays unsparse. Subtract the min value to
 %make them sparse again
 function x = condMap(x)
-x = sparse(log(x+3.5)-log(3.5));
+c=1.75;
+x = sparse(log(x+c)-log(c));
 end
 function x = procMap(x)
-x = sparse(log(x+0.4)-log(0.4));
+c=1.1;
+x = sparse(log(x+c)-log(c));
 end
 function x = drugMap(x)
 x = sparse(log(x+0.5)-log(0.5));
@@ -115,13 +111,13 @@ function x = labMap(x)
 x = sparse(x.^1.1);
 end
 function x = losMap(x)
-x = sparse(x.^0.4);%TODO adjust this
+x = sparse(x.^0.78);
 %x = sparse(x.^3.5);
 %x = sqrt(x);
 %x(:,27) = min(1,x(:,27));
 end
 function x = charlsonMap(x)
-x = sparse(x.^1.1);
+x = sparse(x.^0.9);
 %x = sqrt(x);
 %x = log(x+1);
 end
