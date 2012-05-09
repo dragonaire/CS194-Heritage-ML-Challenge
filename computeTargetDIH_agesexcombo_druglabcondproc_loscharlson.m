@@ -22,6 +22,7 @@ offsets = [0; offsets(1:end)'];
 agesex = ages + 10*(genders-1);
 nrows = length(agesex);
 ncols = offsets(2);
+m = length(logDIH);
 n = offsets(end);
 rows_i = 1:length(agesex);
 cols_i = agesex;
@@ -56,7 +57,7 @@ if ~strcmp(cvx_status,'Solved')
     'computeTargetDIH_agesexcombo_druglabcondproc_loscharlson failed'
     keyboard
 end
-disp(sprintf('agesexcombo_druglabcondproc_loscharlson TRAINING ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
+disp(sprintf('agesexcombo_druglabcondproc_loscharlson TRAINING ERROR: %f',sqrt((cvx_optval^2)/m)))
 
 c_agesex = c(offsets(1)+1:offsets(2));
 c_drugs = c(offsets(2)+1:offsets(3));

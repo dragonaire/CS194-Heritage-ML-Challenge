@@ -1,76 +1,99 @@
-function [target_DIH c] = computeTargetDIH_many1(ages,genders,logDIH,...
+function [target_DIH c] = computeTargetDIH_many2(ages,genders,logDIH,...
     ages_test,genders_test,drugs_train,drugs_test,lab_train,lab_test,cond_train,cond_test,...
     proc_train,proc_test,los_train,los_test,charlson_train,charlson_test,...
-    spec_train,spec_test,place_train,place_test)
+    spec_train,spec_test,place_train,place_test,cache_file)
 constants;
 try
     load('alkjsdfdsal');
     %load('many1.mat');
 catch
-    offsets = [...
-        SIZE.AGE*SIZE.SEX,...
-        SIZE.DRUG_1YR,...
-        SIZE.LAB_1YR,...
-        SIZE.COND_GROUP,...
-        SIZE.PROCEDURE,...
-        SIZE.LoS,...
-        SIZE.CHARLSON,...
-        SIZE.SPECIALTY,...
-        SIZE.PLACE,...
-        ];
-    offsets = cumsum(offsets);
-    offsets = [0; offsets(1:end)'];
+    try
+        load(sprintf(cache_file,1));
+    catch
+        offsets = [...
+            SIZE.AGE*SIZE.SEX,...
+            SIZE.DRUG_1YR,...
+            SIZE.LAB_1YR,...
+            SIZE.COND_GROUP,...
+            SIZE.PROCEDURE,...
+            SIZE.LoS,...
+            SIZE.CHARLSON,...
+            SIZE.SPECIALTY,...
+            SIZE.PLACE,...
+            ];
+        offsets = cumsum(offsets);
+        offsets = [0; offsets(1:end)'];
 
-    agesex = ages + 10*(genders-1);
-    nrows = length(agesex);
-    ncols = offsets(2);
-    m = length(ages);
-    n = offsets(end);
-    rows_i = 1:length(agesex);
-    cols_i = agesex;
-    val = 1;
+        agesex = ages + 10*(genders-1);
+        nrows = length(agesex);
+        ncols = offsets(2);
+        m = length(ages_test);
+        n = offsets(end);
+        rows_i = 1:length(agesex);
+        cols_i = agesex;
+        val = 1;
 
-    % map the data to a new space
-    drugs_train = drugMap(drugs_train);
-    drugs_test = drugMap(drugs_test);
-    lab_train = labMap(lab_train);
-    lab_test = labMap(lab_test);
-    cond_train = condMap(cond_train);
-    cond_test = condMap(cond_test);
-    proc_train = procMap(proc_train);
-    proc_test = procMap(proc_test);
-    los_train = losMap(los_train);
-    los_test = losMap(los_test);
-    charlson_train = charlsonMap(charlson_train);
-    charlson_test = charlsonMap(charlson_test);
-    spec_train = specMap(spec_train);
-    spec_test = specMap(spec_test);
-    place_train = placeMap(place_train);
-    place_test = placeMap(place_test);
+        % map the data to a new space
+        drugs_train = drugMap(drugs_train);
+        drugs_test = drugMap(drugs_test);
+        lab_train = labMap(lab_train);
+        lab_test = labMap(lab_test);
+        cond_train = condMap(cond_train);
+        cond_test = condMap(cond_test);
+        proc_train = procMap(proc_train);
+        proc_test = procMap(proc_test);
+        los_train = losMap(los_train);
+        los_test = losMap(los_test);
+        charlson_train = charlsonMap(charlson_train);
+        charlson_test = charlsonMap(charlson_test);
+        spec_train = specMap(spec_train);
+        spec_test = specMap(spec_test);
+        place_train = placeMap(place_train);
+        place_test = placeMap(place_test);
 
-    A = [full(sparse(rows_i, cols_i, val, nrows, ncols)), ...
-        drugs_train, lab_train, cond_train, proc_train, los_train, charlson_train,...
-        spec_train, place_train];
-    A=sparse(A);
-    LosMatrix = -diag(ones(SIZE.LoS-3,1),1)+eye(SIZE.LoS-2);
-    Charlson = -diag(ones(SIZE.CHARLSON-1,1),1)+eye(SIZE.CHARLSON);
-    cvx_begin quiet
-        variables c(n);
-        minimize(norm(A*c - logDIH))
-        subject to
-            %c(31:end) >= 0;
-            %c(offsets(3:end)) == 0;
-            %c(112:125) == 0; % for not using los
-            % LoS is of increasing badness. except for last 2 columns which had missing data
-            %LosMatrix*c(112:123) <= 0;
-            Charlson*c(126:130) <= 0; % charlson index is of increasing badness
-            c(126:130) == 0; % for not using charlson index
-    cvx_end
+        A = [full(sparse(rows_i, cols_i, val, nrows, ncols)), ...
+            drugs_train, lab_train, cond_train, proc_train, los_train, charlson_train,...
+            spec_train, place_train];
+        A=sparse(A);
+        LosMatrix = -diag(ones(SIZE.LoS-3,1),1)+eye(SIZE.LoS-2);
+        Charlson = -diag(ones(SIZE.CHARLSON-1,1),1)+eye(SIZE.CHARLSON);
+        save(sprintf(cache_file,1),'A','offsets','m','n','LosMatrix','Charlson',...
+            'drugs_train','drugs_test','lab_train','lab_test','cond_train','cond_test',...
+            'proc_train','proc_test','los_train','los_test','charlson_train','charlson_test',...
+            'spec_train','spec_test','place_train','place_test');
+    end
+    try
+        %load('wtf');
+        load(sprintf(cache_file,2));
+    catch
+        minpred = log(MIN_PREDICTION+1);
+        %minpred = 0;
+        logDIH2 = logDIH.^2;
+        logDIH2x = 2*logDIH;
+        cvx_begin
+            variables c(n);
+            %minimize(sum(pow_pos(max(A*c - logDIH,MIN_PREDICTION),2)))
+            %minimize(sum(pow_pos(max(A*c,minpred) - logDIH,2)) + sum(pow_pos(logDIH-max(A*c,minpred),2)))
+            %minimize(sum((max(A*c,minpred) - logDIH).^2) )
+            %minimize(sum(max(A*c,minpred).^2 - 2*logDIH*max(A*c,minpred)) )
+            %minimize( sum(square_pos(A*c) - 2*logDIH*square_pos(A*c) + logDIH.^2) )
+            minimize( sum(square_pos(max(A*c,minpred)) - logDIH2x.*square_pos(max(A*c,minpred)) + logDIH2) )
+            subject to
+                %c(31:end) >= 0;
+                %c(offsets(3:end)) == 0;
+                %c(112:125) == 0; % for not using los
+                % LoS is of increasing badness. except for last 2 columns which had missing data
+                %LosMatrix*c(112:123) <= 0;
+                Charlson*c(126:130) <= 0; % charlson index is of increasing badness
+                c(126:130) == 0; % for not using charlson index
+        cvx_end
+        save(sprintf(cache_file,2),'cvx_optval','cvx_status','c');
+    end
     if ~strcmp(cvx_status,'Solved') && ~strcmp(cvx_status,'Inaccurate/Solved')
-        'computeTargetDIH_many1 failed'
+        'computeTargetDIH_many2 failed'
         keyboard
     end
-    disp(sprintf('computeTargetDIH_many1 TRAINING ERROR: %f',sqrt((cvx_optval^2)/m)))
+    disp(sprintf('computeTargetDIH_many2 TRAINING ERROR: %f',sqrt(cvx_optval/m)))
 
     c_agesex = c(offsets(1)+1:offsets(2));
     c_drugs = c(offsets(2)+1:offsets(3));
@@ -89,7 +112,7 @@ catch
     %save('many1.mat','A','c','M');
 end
 %keyboard
-c = hillClimb3(A,c,logDIH);
+%c = hillClimb3(A,c,logDIH);
 target_DIH = M*c;
 target_DIH = exp(target_DIH)-1;
 end

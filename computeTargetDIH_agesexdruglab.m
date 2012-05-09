@@ -14,10 +14,9 @@ offsets = [...
     SIZE.LAB_1YR,...
     ];
 offsets = cumsum(offsets);
+m = length(logDIH);
 n = offsets(end);
 offsets = [0; offsets(1:end)'];
-m = length(ages);
-%A = zeros(m,n);
 
 rows_i = [1:length(ages) 1:length(ages)];
 cols_i = [ages' (offsets(2)+genders)'];
@@ -34,7 +33,7 @@ if ~strcmp(cvx_status,'Solved')
     'computeTargetDIH_agesexdruglab failed'
     keyboard
 end
-disp(sprintf('computeTargetDIH_agesexdruglab TRAINING ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
+disp(sprintf('computeTargetDIH_agesexdruglab TRAINING ERROR: %f',sqrt((cvx_optval^2)/m)))
 
 c_age = c(offsets(1)+1:offsets(2));
 c_sex = c(offsets(2)+1:offsets(3));

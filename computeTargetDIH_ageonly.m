@@ -1,5 +1,6 @@
 function target_DIH = computeTargetDIH_ageonly(target,bins)
 constants;
+m = length(target.ages);
 % find optimal # of days for age bins
 num_bins = SIZE.AGE;
 cvx_begin quiet
@@ -19,7 +20,7 @@ if ~strcmp(cvx_status,'Solved')
     'computeTargetDIH_ageonly failed'
     keyboard
 end
-disp(sprintf('computeTargetDIH_ageonly TRAINING ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
+disp(sprintf('computeTargetDIH_ageonly TRAINING ERROR: %f',sqrt((cvx_optval^2)/m)))
 
 DIHages = exp(dih) - 1;
 

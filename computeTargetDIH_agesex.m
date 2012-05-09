@@ -10,6 +10,7 @@ nrows = length(ages);
 ncols = num_bins;
 A = sparse(rows_i, cols_i, val, nrows, ncols);
 
+m = length(logDIH);
 cvx_begin quiet
     variables c(num_bins);
     minimize(norm(A*c - logDIH))
@@ -18,7 +19,7 @@ if ~strcmp(cvx_status,'Solved')
     'computeTargetDIH_agesex failed'
     keyboard
 end
-disp(sprintf('computeTargetDIH_agesex TRAINING ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
+disp(sprintf('computeTargetDIH_agesex TRAINING ERROR: %f',sqrt((cvx_optval^2)/m)))
 
 c_age = c(1:SIZE.AGE);
 c_sex = c(SIZE.AGE+1:SIZE.AGE+SIZE.SEX);

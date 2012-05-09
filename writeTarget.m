@@ -1,6 +1,6 @@
 function [] = writeTarget(filename,target)
 constants;
-target.DIH = min(max(target.DIH, MIN_PREDICTION), MAX_PREDICTION);
+target.DIH = postProcess(target.DIH);
 % put the predictions back into the right order
 target.DIH(target.memberids_i) = target.DIH;
 % writes predicted DIH as .csv to target filename (i.e. 'Target_1.csv')

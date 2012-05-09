@@ -12,6 +12,7 @@ offsets = [...
     SIZE.DRUG_1YR,...
     ];
 offsets = cumsum(offsets);
+m = length(logDIH);
 n = offsets(end);
 offsets = [0; offsets(1:end)'];
 
@@ -30,7 +31,7 @@ if ~strcmp(cvx_status,'Solved')
     'computeTargetDIH_agesexdrug failed'
     keyboard
 end
-disp(sprintf('computeTargetDIH_agesexdrug TRAINING ERROR: %f',sqrt((cvx_optval^2)/NUM_TARGETS)))
+disp(sprintf('computeTargetDIH_agesexdrug TRAINING ERROR: %f',sqrt((cvx_optval^2)/m)))
 
 c_age = c(offsets(1)+1:offsets(2));
 c_sex = c(offsets(2)+1:offsets(3));
