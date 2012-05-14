@@ -1,6 +1,7 @@
 function [target_DIH params] = computeTargetDIH_catvec1_many2(ages,genders,logDIH,...
     ages_test,genders_test,drugs_train,drugs_test,lab_train,lab_test,cond_train,cond_test,...
     proc_train,proc_test,spec_train,spec_test,place_train,place_test)
+rand('seed',123456);
 constants;
 offsets = [...
     SIZE.AGE*SIZE.SEX,...
@@ -13,7 +14,8 @@ offsets = [...
     ];
 offsets = cumsum(offsets);
 offsets = [0; offsets(1:end)'];
-DIM = 4;
+DIM = 4; NITERS = 2; %TODO need to increase this. but we run out of memory
+DIM = 1; NITERS = 10; %TODO need to increase this. but we run out of memory
 
 agesex = ages + 10*(genders-1);
 nrows = length(agesex);
@@ -65,7 +67,6 @@ catch
     end
     save(sprintf('cache/computeTargetDIH_catvec1_DIM%d_m%d.mat',DIM,m),'B','B_test');
 end
-NITERS = 10;
 f = rand(n,DIM)-0.5; g = rand(n,DIM)-0.5;
 disp('Starting cvx');
 prev_opt = inf; cur_opt = inf; cur_g = g; cur_f = f;
@@ -88,7 +89,6 @@ for i=1:NITERS
             end
             cur_opt = cvx_optval; cur_g = g; cur_f = f; 
             g = f; % this makes it so it keeps switching sides
-            disp(sprintf('ITER %d: computeTargetDIH_catvec1_many2 TRAINING ERROR: %f',i,sqrt((cvx_optval^2)/m)))
             if prev_opt < cvx_optval + 0.01
                 break
             end
@@ -100,6 +100,7 @@ for i=1:NITERS
             break
         end
     end
+    disp(sprintf('ITER %d: computeTargetDIH_catvec1_many2 TRAINING ERROR: %f',i,sqrt((cur_opt^2)/m)))
 end
 disp(sprintf('computeTargetDIH_catvec1_many2 TRAINING ERROR: %f',sqrt((cur_opt^2)/m)))
 
