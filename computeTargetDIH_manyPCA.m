@@ -65,7 +65,8 @@ catch
         drugs_train, lab_train, cond_train, proc_train, los_train, ...
         spec_train, place_train];
     A = full(A);
-    A_means = ones(size(A,1),1)*mean(A);
+    [m, n] = size(A);
+    A_means = ones(m,1)*mean(A);
     [pc, scores] = princomp(A);
     A_pca = scores(:,1:num_pc)*pc(:,1:num_pc)' + A_means;
     %A_pca = scores*pc' + A_means;   
@@ -74,7 +75,7 @@ catch
     %Charlson = -diag(ones(SIZE.CHARLSON-1,1),1)+eye(SIZE.CHARLSON);
     fprintf('Optimizing with cvx...\n');
     cvx_begin quiet
-        variables c(num_pc);
+        variables c(n);
         minimize(norm(A_pca*c - logDIH))
         %subject to
             %c(31:end) >= 0;
