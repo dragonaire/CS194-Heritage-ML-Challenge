@@ -106,13 +106,41 @@ yr3_pred = postProcess(yr3_pred);
 disp(sprintf('TEST ERROR %f',sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2))));
 all_yr3_pred = [all_yr3_pred, yr3_pred];
 
+[yr3_pred] = computeTargetDIH_catvec1_agesex(fake_target,ages.yr2,genders.yr2,logDIH.yr2,...
+    fake_target.ages,fake_target.genders);
+ppp_yr3_pred = [ppp_yr3_pred, yr3_pred]; % pre-post-process
+yr3_pred = postProcess(yr3_pred);
+disp(sprintf('TEST ERROR %f',sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2))));
+all_yr3_pred = [all_yr3_pred, yr3_pred];
+
+[yr3_pred c] = computeTargetDIH_catvec1_many1(ages.yr2,genders.yr2,logDIH.yr2,...
+    fake_target.ages,fake_target.genders,drugs.features2_1yr,drugs.features3_1yr,...
+    lab.features2_1yr,lab.features3_1yr,claims.f2.condGroup,claims.f3.condGroup,...
+    claims.f2.procedure,claims.f3.procedure,claims.f2.LoS,claims.f3.LoS,...
+    claims.f2.charlson,claims.f3.charlson,claims.f2.specialty,claims.f3.specialty,...
+    claims.f2.place,claims.f3.place);
+ppp_yr3_pred = [ppp_yr3_pred, yr3_pred]; % pre-post-process
+yr3_pred = postProcess(yr3_pred);
+disp(sprintf('TEST ERROR %f',sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2))));
+all_yr3_pred = [all_yr3_pred, yr3_pred];
+
+[yr3_pred c] = computeTargetDIH_catvec1_many2(ages.yr2,genders.yr2,logDIH.yr2,...
+    fake_target.ages,fake_target.genders,drugs.features2_1yr,drugs.features3_1yr,...
+    lab.features2_1yr,lab.features3_1yr,claims.f2.condGroup,claims.f3.condGroup,...
+    claims.f2.procedure,claims.f3.procedure,claims.f2.specialty,claims.f3.specialty,...
+    claims.f2.place,claims.f3.place);
+ppp_yr3_pred = [ppp_yr3_pred, yr3_pred]; % pre-post-process
+yr3_pred = postProcess(yr3_pred);
+disp(sprintf('TEST ERROR %f',sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2))));
+all_yr3_pred = [all_yr3_pred, yr3_pred];
+
 %get median DIH for each member
-yr3_pred = median(all_yr3_pred(:,9:11),2);
+yr3_pred = median(all_yr3_pred(:,9:12),2);
 disp('SMALL MEDIAN PREDICTOR');
 disp(sprintf('TEST ERROR %f',sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2))));
 
 %get median DIH for each member
-yr3_pred = median(ppp_yr3_pred(:,9:11),2);
+yr3_pred = median(ppp_yr3_pred(:,9:12),2);
 yr3_pred = postProcess(yr3_pred);
 disp('PRE-POST-PROCESS SMALL MEDIAN PREDICTOR');
 disp(sprintf('TEST ERROR %f',sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2))));

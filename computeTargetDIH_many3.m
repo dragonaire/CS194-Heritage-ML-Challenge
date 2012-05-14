@@ -94,7 +94,7 @@ catch
         'computeTargetDIH_many3 failed'
         keyboard
     end
-    fprintf('computeTargetDIH_many3 TRAINING ERROR: %f',sqrt((cvx_optval^2)/m)));
+    fprintf('computeTargetDIH_many3 TRAINING ERROR: %f',sqrt((cvx_optval^2)/m));
 
 %     c_agesex = c(offsets(1)+1:offsets(2));
 %     c_drugs = c(offsets(2)+1:offsets(3));

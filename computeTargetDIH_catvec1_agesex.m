@@ -19,7 +19,7 @@ nrows = length(agesex);
 ncols = num_bins;
 A = sparse(rows_i, cols_i, val, nrows, ncols);
 try
-    load(sprintf('cache/computeTargetDIH_catvec1_agesex_DIM%d.mat',DIM));
+    load(sprintf('cache/computeTargetDIH_catvec1_agesex_DIM%d_m%d.mat',DIM,m));
 catch
     B = sparse([],[],0,m,DIM*m,DIM*m);
     C=sparse(1:m,1:m,1,m,m);
@@ -30,7 +30,7 @@ catch
         B(:,i:DIM:end) = C;
         B_test(:,i:DIM:end) = C_test;
     end
-    save(sprintf('cache/computeTargetDIH_catvec1_agesex_DIM%d.mat',DIM),'B','B_test');
+    save(sprintf('cache/computeTargetDIH_catvec1_agesex_DIM%d_m%d.mat',DIM,m),'B','B_test');
 end
 
 NITERS = 1;
