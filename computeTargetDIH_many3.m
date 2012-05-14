@@ -5,7 +5,7 @@ function [target_DIH c] = computeTargetDIH_many3(ages,genders,logDIH,...
 constants;
 ZSCORE = true;
 KERNEL = false;
-num_pc = 147;  % cutoff for number of components to use
+num_pc = 160;  % cutoff for number of components to use (max 165)
 try
     load('alkjsdfdsal');
     %load('many1.mat');
@@ -57,6 +57,7 @@ catch
     A = [full(sparse(rows_i, cols_i, val, nrows, ncols)), ...%ones(m,1), ...
         drugs_train, lab_train, cond_train, proc_train, los_train, charlson_train,...
         spec_train, place_train, dsfs_train];
+    [m, n] = size(A);
     if KERNEL
         A = sparse(A);
         A = kernel(A,1);
@@ -68,7 +69,8 @@ catch
     else
         [pc,scores,vars] = princomp(A);
     end
-    [m, n] = size(A);
+    
+    fprintf('size of A: %d by %d\n', m, n);
     A_means = ones(m,1)*mean(A);
     A_pca = scores(:,1:num_pc)*pc(:,1:num_pc)' + A_means;
     %A_pca = scores*pc' + A_means;   
@@ -79,7 +81,7 @@ catch
     Charlson = -diag(ones(SIZE.CHARLSON-1,1),1)+eye(SIZE.CHARLSON);
     cvx_begin quiet
         variables c(n);
-        minimize(norm(A*c - logDIH))
+        minimize(norm(A_pca*c - logDIH))
         subject to
             %c(31:end) >= 0;
             %c(offsets(3:end)) == 0;
@@ -94,7 +96,7 @@ catch
         'computeTargetDIH_many3 failed'
         keyboard
     end
-    fprintf('computeTargetDIH_many3 TRAINING ERROR: %f',sqrt((cvx_optval^2)/m));
+    fprintf('computeTargetDIH_many3 TRAINING ERROR: %f\n',sqrt((cvx_optval^2)/m));
 
 %     c_agesex = c(offsets(1)+1:offsets(2));
 %     c_drugs = c(offsets(2)+1:offsets(3));
@@ -116,7 +118,7 @@ catch
     end
 end
 %keyboard
-c = hillClimb3(A_pca,c,logDIH,152);
+c = hillClimb3(A_pca,c,logDIH,n);
 target_DIH = M*c;
 target_DIH = exp(target_DIH)-1;
 end
