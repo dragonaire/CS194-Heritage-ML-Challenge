@@ -5,6 +5,7 @@ function [target_DIH c] = computeTargetDIH_many3(ages,genders,logDIH,...
 constants;
 ZSCORE = true;
 KERNEL = false;
+num_pc = 147;  % cutoff for number of components to use
 try
     load('alkjsdfdsal');
     %load('many1.mat');
@@ -59,18 +60,19 @@ catch
     if KERNEL
         A = sparse(A);
         A = kernel(A,1);
-        n=n*n;
+        n = n*n;
     end
     A = full(A);
     if ZSCORE
-        [pc,scores,latent] = princomp(zscore(A));
+        [pc,scores,vars] = princomp(zscore(A));
     else
-        [pc,scores,latent] = princomp(A);
+        [pc,scores,vars] = princomp(A);
     end
-    A = zeros(size(A));
-    for i=1:n
-        A = A + scores(:,i)*pc(:,i)';
-    end
+    [m, n] = size(A);
+    A_means = ones(m,1)*mean(A);
+    A_pca = scores(:,1:num_pc)*pc(:,1:num_pc)' + A_means;
+    %A_pca = scores*pc' + A_means;   
+    
     disp('starting cvx');
     %A=sparse(A);
     LosMatrix = -diag(ones(SIZE.LoS-3,1),1)+eye(SIZE.LoS-2);
@@ -92,29 +94,29 @@ catch
         'computeTargetDIH_many3 failed'
         keyboard
     end
-    disp(sprintf('computeTargetDIH_many3 TRAINING ERROR: %f',sqrt((cvx_optval^2)/m)))
+    fprintf('computeTargetDIH_many3 TRAINING ERROR: %f',sqrt((cvx_optval^2)/m)));
 
-    c_agesex = c(offsets(1)+1:offsets(2));
-    c_drugs = c(offsets(2)+1:offsets(3));
-    c_lab = c(offsets(3)+1:offsets(4));
-    c_cond = c(offsets(4)+1:offsets(5));
-    c_proc = c(offsets(5)+1:offsets(6));
-    c_los = c(offsets(6)+1:offsets(7));
-    c_charlson = c(offsets(7)+1:offsets(8));
-    c_spec = c(offsets(8)+1:offsets(9));
-    c_place = c(offsets(9)+1:offsets(10));
+%     c_agesex = c(offsets(1)+1:offsets(2));
+%     c_drugs = c(offsets(2)+1:offsets(3));
+%     c_lab = c(offsets(3)+1:offsets(4));
+%     c_cond = c(offsets(4)+1:offsets(5));
+%     c_proc = c(offsets(5)+1:offsets(6));
+%     c_los = c(offsets(6)+1:offsets(7));
+%     c_charlson = c(offsets(7)+1:offsets(8));
+%     c_spec = c(offsets(8)+1:offsets(9));
+%     c_place = c(offsets(9)+1:offsets(10));
 
     agesex_test = ages_test + 10*(genders_test-1);
     agesex_test = sparse(1:length(ages_test), agesex_test, 1, length(ages_test), SIZE.AGE*SIZE.SEX);
     M = sparse([agesex_test,drugs_test,lab_test,cond_test,proc_test,los_test,charlson_test,...
         spec_test,place_test,dsfs_test]);
-    %save('many1.mat','A','c','M');
+    
     if ZSCORE
         M = zscore(M);
     end
 end
 %keyboard
-c = hillClimb3(A,c,logDIH,152);
+c = hillClimb3(A_pca,c,logDIH,152);
 target_DIH = M*c;
 target_DIH = exp(target_DIH)-1;
 end
