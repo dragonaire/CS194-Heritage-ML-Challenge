@@ -5,7 +5,7 @@ function [target_DIH c] = computeTargetDIH_many1(ages,genders,logDIH,...
 constants;
 try
     load('alkjsdfdsal');
-    %load('many1.mat');
+    load('many1.mat');
 catch
     offsets = [...
         SIZE.AGE*SIZE.SEX,...
@@ -129,109 +129,4 @@ end
 function x = placeMap(x)
 %x = sqrt(x);
 x = sparse(log(x+0.4)-log(0.4));
-end
-function c = hillClimb(A,c,logDIH)
-constants;
-STEP = 0.000025;
-OVERFIT = 0.65;
-indices = [1:111,126:152];
-v = A*c;
-old = norm(max(postProcess(v)-logDIH,OVERFIT));
-for iter=1:13
-    change = false;
-    for i=indices
-        %TODO should be 
-        % norm(max(abs(max(A*c,MIN_PREDICTION)-logDIH),OVERFIT));
-        % for some reason the abs is detrimental
-        v1 = v + STEP*A(:,i);
-        new1 = norm(max(postProcess(v1)-logDIH,OVERFIT));
-        v2 = v - STEP*A(:,i);
-        new2 = norm(max(postProcess(v2)-logDIH,OVERFIT));
-        if new1 < old && new1 < new2
-            change=true;
-            c(i) = c(i) + STEP;
-            v=v1;
-            old=new1;
-        elseif new2 < old && new2 < new1
-            change=true;
-            c(i) = c(i) - STEP;
-            v=v2;
-            old=new2;
-        end 
-    end
-    if ~change
-        break
-    end
-    vtrain = sqrt(mean((postProcess(A*c)-logDIH).^2));
-    %disp(sprintf('%d: index %d, train: %f',iter,i,vtrain));
-end
-end
-function c = hillClimb2(A,c,logDIH)
-constants;
-STEP = 0.0005;
-GRAD = 1;
-OVERFIT = 0;%0.65;
-%indices = [1:111,126:152];
-indices = 1:152;
-disp(sprintf('0: train: %f',sqrt(mean((postProcess(A*c)-logDIH).^2))));
-v = A*c;
-for iter=1:100
-    old = norm(max(abs(postProcess(v)-logDIH),OVERFIT));
-    step = zeros(size(c));
-    for i=indices
-        new1 = norm(max(abs(postProcess(v + STEP*A(:,i))-logDIH),OVERFIT));
-        new2 = norm(max(abs(postProcess(v - STEP*A(:,i))-logDIH),OVERFIT));
-        if new1 < old && new1 < new2
-            step(i) = old-new1;
-        elseif new2 < old && new2 < new1
-            step(i) = -(old-new2);
-        end 
-    end
-    if step==0
-        break;
-    end
-    step = step/norm(step);
-    c = c + STEP*step;
-    v = A*c;
-    %c(i) = c(i) + step(i);
-    %v = v + step(i)*A(:,i);
-    %old = val(i);
-    %old_vtrain = vtrain;
-    vtrain = sqrt(mean((postProcess(A*c)-logDIH).^2));
-    %disp(sprintf('%d: index %d, train: %f, steplen: %f',iter,i,vtrain,STEP));
-end
-end
-function c = hillClimb3(A,c,logDIH)
-constants;
-STEP = 0.000025;
-OVERFIT = 0.0;%0.65;
-%indices = [1:111,126:152];
-indices = 1:152;
-v = A*c;
-old = norm(max(abs(postProcess(v)-logDIH),OVERFIT));
-for iter=1:100
-    change = 0;
-    for i=indices
-        v1 = v + STEP*A(:,i);
-        new1 = norm(max(abs(postProcess(v1)-logDIH),OVERFIT));
-        v2 = v - STEP*A(:,i);
-        new2 = norm(max(abs(postProcess(v2)-logDIH),OVERFIT));
-        if new1 < old && new1 < new2
-            change=old-new1;
-            c(i) = c(i) + STEP;
-            v=v1;
-            old=new1;
-        elseif new2 < old && new2 < new1
-            change=old-new1;
-            c(i) = c(i) - STEP;
-            v=v2;
-            old=new2;
-        end 
-    end
-    if change <= 0
-        break
-    end
-    vtrain = sqrt(mean((postProcess(A*c)-logDIH).^2));
-    %disp(sprintf('%d: index %d, train: %f',iter,i,vtrain));
-end
 end

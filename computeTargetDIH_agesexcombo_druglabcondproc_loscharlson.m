@@ -66,10 +66,18 @@ c_cond = c(offsets(4)+1:offsets(5));
 c_proc = c(offsets(5)+1:offsets(6));
 c_los = c(offsets(6)+1:offsets(7));
 c_charlson = c(offsets(7)+1:offsets(8));
+%{
 target_agesex = ages_test + 10*(genders_test-1);
 target_DIH = c_agesex(target_agesex) + drugs_test*c_drugs + ...
     lab_test*c_lab + cond_test*c_cond + proc_test*c_proc + ...
     los_test*c_los + charlson_test*c_charlson;
+%}
+agesex_test = ages_test + 10*(genders_test-1);
+agesex_test = sparse(1:length(ages_test), agesex_test, 1, length(ages_test), SIZE.AGE*SIZE.SEX);
+M = sparse([agesex_test,drugs_test,lab_test,cond_test,proc_test,los_test,...
+  charlson_test]);
+c = hillClimb3(A,c,logDIH);
+target_DIH = M*c;
 target_DIH = exp(target_DIH)-1;
 end
 %TODO these functions make the arrays unsparse. Subtract the min value to

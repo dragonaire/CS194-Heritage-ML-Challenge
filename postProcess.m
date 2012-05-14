@@ -1,6 +1,13 @@
 function [ p ] = postProcess(p)
 constants;
 p = min(max(p, MIN_PREDICTION), MAX_PREDICTION);
+return;
+CUTOFF = 0.058;
+DECAY = 0.7;
+p_exp = exp(DECAY*p) * (CUTOFF / exp(DECAY*CUTOFF));
+p = min(p,MAX_PREDICTION);
+p(p<CUTOFF) = p_exp(p<CUTOFF);
+
 %{
 ccbias = 0.007125622;
 ccslope = 0.9566299;
