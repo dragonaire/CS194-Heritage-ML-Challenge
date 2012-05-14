@@ -5,7 +5,7 @@ function [target_DIH c] = computeTargetDIH_many3(ages,genders,logDIH,...
 constants;
 ZSCORE = true;
 KERNEL = false;
-num_pc = 160;  % cutoff for number of components to use (max 165)
+num_pc = 165;  % cutoff for number of components to use (max 165)
 try
     load('alkjsdfdsal');
     %load('many1.mat');
@@ -70,7 +70,6 @@ catch
         [pc,scores,vars] = princomp(A);
     end
     
-    fprintf('size of A: %d by %d\n', m, n);
     A_means = ones(m,1)*mean(A);
     A_pca = scores(:,1:num_pc)*pc(:,1:num_pc)' + A_means;
     %A_pca = scores*pc' + A_means;   
@@ -113,13 +112,20 @@ catch
     M = sparse([agesex_test,drugs_test,lab_test,cond_test,proc_test,los_test,charlson_test,...
         spec_test,place_test,dsfs_test]);
     
+    M = full(M);
     if ZSCORE
-        M = zscore(M);
+        [pc,scores,vars] = princomp(zscore(M));
+    else
+        [pc,scores,vars] = princomp(M);
     end
+    
+    M_means = ones(size(M,1),1)*mean(M);
+    M_pca = scores(:,1:num_pc)*pc(:,1:num_pc)' + M_means;
+
 end
 %keyboard
 c = hillClimb3(A_pca,c,logDIH,n);
-target_DIH = M*c;
+target_DIH = M_pca*c;
 target_DIH = exp(target_DIH)-1;
 end
 %TODO these functions make the arrays unsparse. Subtract the min value to
