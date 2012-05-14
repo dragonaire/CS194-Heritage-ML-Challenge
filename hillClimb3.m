@@ -1,9 +1,13 @@
-function c = hillClimb3(A,c,logDIH)
+function c = hillClimb3(A,c,logDIH,maxIndex)
 constants;
 STEP = 0.000025;
 OVERFIT = 0.0;%0.65;
 %indices = [1:111,126:152];
-indices = 1:length(c);
+if nargin >= 4
+  indices = 1:maxIndex;
+else
+  indices = 1:length(c);
+end
 v = A*c;
 old = norm(max(abs(postProcess(v)-logDIH),OVERFIT));
 for iter=1:100
