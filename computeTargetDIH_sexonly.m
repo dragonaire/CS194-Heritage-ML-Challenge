@@ -1,6 +1,7 @@
 function target_DIH = computeTargetDIH_sexonly(target,logDIH)
 constants;
 %find optimal # of days for male, female, nosex
+cvx_clear
 cvx_begin quiet
     variables DIHm DIHf DIHns;
     minimize( norm([DIHm-logDIH.male; DIHf-logDIH.female; DIHns-logDIH.nosex]) )

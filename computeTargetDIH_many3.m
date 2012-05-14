@@ -5,7 +5,7 @@ function [target_DIH c vars] = computeTargetDIH_many3(ages,genders,logDIH,...
 constants;
 ZSCORE = false; %TODO must use same means and vars for both A and M
 KERNEL = false;
-num_pc = 156  % cutoff for number of components to use (max 165)
+num_pc = 156;  % cutoff for number of components to use (max 165)
 try
     load('alkjsdfdsal');
     %load('many1.mat');
@@ -77,6 +77,7 @@ catch
     %A=sparse(A);
     LosMatrix = -diag(ones(SIZE.LoS-3,1),1)+eye(SIZE.LoS-2);
     Charlson = -diag(ones(SIZE.CHARLSON-1,1),1)+eye(SIZE.CHARLSON);
+	cvx_clear;
     cvx_begin quiet
         variables c(n);
         minimize(norm(A_pca*c - logDIH))

@@ -29,18 +29,26 @@ cols_i = agesex;
 val = 1;
 
 % map the data to a new space
-drugs_train = drugMap(drugs_train);
-drugs_test = drugMap(drugs_test);
-lab_train = labMap(lab_train);
-lab_test = labMap(lab_test);
-cond_train = condMap(cond_train);
-cond_test = condMap(cond_test);
-proc_train = procMap(proc_train);
-proc_test = procMap(proc_test);
-spec_train = specMap(spec_train);
-spec_test = specMap(spec_test);
-place_train = placeMap(place_train);
-place_test = placeMap(place_test);
+try
+    load(sprintf('cache/catvec1_many2_data_m%d.mat',m));
+catch
+    drugs_train = drugMap(drugs_train);
+    drugs_test = drugMap(drugs_test);
+    lab_train = labMap(lab_train);
+    lab_test = labMap(lab_test);
+    cond_train = condMap(cond_train);
+    cond_test = condMap(cond_test);
+    proc_train = procMap(proc_train);
+    proc_test = procMap(proc_test);
+    spec_train = specMap(spec_train);
+    spec_test = specMap(spec_test);
+    place_train = placeMap(place_train);
+    place_test = placeMap(place_test);
+    save(sprintf('cache/catvec1_many2_data_m%d.mat',m),'drugs_train','lab_train',...
+        'cond_train','proc_train','spec_train','place_train',...
+        'drugs_test','lab_test','cond_test','proc_test',...
+        'spec_test','place_test');
+end
 
 A = [full(sparse(rows_i, cols_i, val, nrows, ncols)), ...
     drugs_train, lab_train, cond_train, proc_train,...
@@ -76,16 +84,15 @@ catch
     save(sprintf('cache/computeTargetDIH_catvec1_DIM%d_m%d.mat',DIM,m),'B','B_test');
 end
 f = rand(n,DIM)-0.5; g = rand(n,DIM)-0.5;
-disp('Starting cvx');
+%disp('Starting cvx');
 prev_opt = inf; cur_opt = inf; cur_g = g; cur_f = f;
 for i=1:NITERS
-    disp(sprintf('ITER %d',i));
     try
-        load(sprintf('cache/computeTargetDIH_catvec1_many2_DIM%d_m%d_i%d.mat',DIM,m,i));
+        load(sprintf('cache/catvec1_many2_DIM%d_m%d_pc%d_i%d.mat',DIM,m,num_pc,i));
     catch
         try
             cvx_clear
-            cvx_begin
+            cvx_begin quiet
                 variables f(n,DIM) x(DIM*m);
                 minimize( norm(B*x - logDIH) )
                 subject to
@@ -96,13 +103,13 @@ for i=1:NITERS
                 keyboard
             end
             cur_opt = cvx_optval; cur_g = g; cur_f = f; 
-            g = f; % this makes it so it keeps switching sides
-            if prev_opt < cvx_optval + 0.01
+            g = f; % this makes it so it keeps switching sides;
+            save(sprintf('cache/catvec1_many2_DIM%d_m%d_pc%d_i%d.mat',DIM,m,num_pc,i),...
+                'prev_opt','cur_opt','cur_g','cur_f','g');
+            if prev_opt < cur_opt + 0.01
                 break
             end
-            prev_opt = cvx_optval;
-            save(sprintf('cache/computeTargetDIH_catvec1_many2_DIM%d_m%d_i%d.mat',DIM,m,i),...
-                'prev_opt','cur_opt','cur_g','cur_f','g');
+            prev_opt = cur_opt;
         catch
             disp('TERMINATED! PROBABLY RAN OUT OF MEMORY');
             break

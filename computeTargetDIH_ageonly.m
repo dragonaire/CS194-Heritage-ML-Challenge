@@ -3,6 +3,7 @@ constants;
 m = length(target.ages);
 % find optimal # of days for age bins
 num_bins = SIZE.AGE;
+cvx_clear
 cvx_begin quiet
     variables dih(num_bins,1);
     minimize(norm([dih(1)-bins.age{1};...
