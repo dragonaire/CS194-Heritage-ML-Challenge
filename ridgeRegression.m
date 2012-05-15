@@ -1,12 +1,13 @@
 function [targetDIH,weights] = ridgeRegression(preds, ...
 	test_var, test_opt_const, leaderboard_scores)
-% logDIH is from the training year
 % m_test is the number of predictions for the target year
 m_test = length(preds);
-ALPHA = 0.07;%0.0015;
+ALPHA = 0.0007;%0.0015;
 alpha = ALPHA*m_test;
 [m,n] = size(preds);
 
+% preds is in day space so change it to log space
+preds = log(preds+1);
 Xmeans = repmat(mean(preds),m,1);
 X = preds - Xmeans;
 
