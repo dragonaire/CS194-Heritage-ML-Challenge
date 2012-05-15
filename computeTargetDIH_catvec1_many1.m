@@ -94,6 +94,10 @@ for i=1:NITERS
     try
         load(sprintf('cache/catvec1_many1_DIM%d_m%d_pc%d_i%d.mat',DIM,m,num_pc,i));
     catch
+        if prev_opt < cur_opt + CATVEC_TERMINATE_THRESH
+            break
+        end
+        prev_opt = cur_opt;
         try
             cvx_clear
             cvx_begin quiet
@@ -110,18 +114,16 @@ for i=1:NITERS
             g = f; % this makes it so it keeps switching sides
             save(sprintf('cache/catvec1_many1_DIM%d_m%d_pc%d_i%d.mat',DIM,m,num_pc,i),...
                 'prev_opt','cur_opt','cur_g','cur_f','g');
-            if prev_opt < cur_opt + 0.01
-                break
-            end
-            prev_opt = cur_opt;
         catch
             disp('TERMINATED! PROBABLY RAN OUT OF MEMORY');
             break
         end
     end
-    disp(sprintf('ITER %d: computeTargetDIH_catvec1_many1 TRAINING ERROR: %f',i,sqrt((cur_opt^2)/m)))
+    %disp(sprintf('ITER %d: computeTargetDIH_catvec1_many1 TRAINING ERROR: %f',i,sqrt((cur_opt^2)/m)))
 end
 disp(sprintf('computeTargetDIH_catvec1_many1 TRAINING ERROR: %f',sqrt((cur_opt^2)/m)))
+
+[cur_f,cur_g] = hillClimbCatVec(A_pca,B,cur_f,cur_g,logDIH,DIM);
 
 x = reshape((M_pca*cur_g)',DIM*m_test,1).*reshape((M_pca*cur_f)',DIM*m_test,1);
 target_DIH = B_test*x;

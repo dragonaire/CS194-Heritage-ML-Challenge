@@ -3,6 +3,9 @@ NUM_TRAINING = 113000;
 MIN_PREDICTION = 0.057; %TODO find a better way to choose this constant
 MAX_PREDICTION = 14.0; %TODO find a better way to choose this constant
 
+LEADERBOARD_OPT_CONST = 0.209179;
+LEADERBOARD_VAR = (0.486459)^2;
+
 MAXPAYDELAY = 162;
 % 1 for male, 2 for female, 0 for no sex
 MALE = 1; FEMALE = 2; NOSEX = 3;
@@ -29,5 +32,6 @@ SIZE.CHARLSON = 5;
 SIZE.PROCEDURE = 18;
 SIZE.CLAIMS_TRUNC = 1;
 
-MANY1_NUMPC = 115;
-MANY2_NUMPC = 110;
+MANY1_NUMPC = 130;
+MANY2_NUMPC = 120;
+CATVEC_TERMINATE_THRESH = 0.01;

@@ -1,7 +1,26 @@
 
+
+indices = 9:14;
+yr3_opt_const = mean(logDIH.yr3);
+yr3_var = mean((logDIH.yr3 - yr3_opt_const).^2);
+[yr3_pred,weights] = ridgeRegression(all_yr3_pred(:,indices), yr3_var,...
+    yr3_opt_const, yr3_rmse(indices));
+weights'
+testerr = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2));
+disp(sprintf('TEST ERROR %f',testerr));
+
+[yr3_pred,weights] = ridgeRegression(all_yr3_pred(:,:), yr3_var,...
+    yr3_opt_const, yr3_rmse(:));
+weights'
+testerr = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2));
+disp(sprintf('TEST ERROR %f',testerr));
+return
+
 numpc=[85:5:140; 75:5:130];
+numpc=[129:131; 118:120];
+numpc=120*ones(2,1);
 errs1 = []; errs2=[];
-for i=1:40
+for i=1:size(numpc,2)
     [yr3_pred c] = computeTargetDIH_catvec1_many2(ages.yr2,genders.yr2,logDIH.yr2,...
         fake_target.ages,fake_target.genders,drugs.features2_1yr,drugs.features3_1yr,...
         lab.features2_1yr,lab.features3_1yr,claims.f2.condGroup,claims.f3.condGroup,...
@@ -17,6 +36,7 @@ for i=1:40
         claims.f3.condGroup,claims.f4.condGroup,claims.f3.procedure,claims.f4.procedure,...
         claims.f3.specialty,claims.f4.specialty,claims.f3.place,claims.f4.place,numpc(2,i));
 
+    %{
     [yr3_pred c A_vars M_vars] = computeTargetDIH_catvec1_many1(ages.yr2,genders.yr2,logDIH.yr2,...
         fake_target.ages,fake_target.genders,drugs.features2_1yr,drugs.features3_1yr,...
         lab.features2_1yr,lab.features3_1yr,claims.f2.condGroup,claims.f3.condGroup,...
@@ -32,9 +52,13 @@ for i=1:40
         claims.f3.condGroup,claims.f4.condGroup,claims.f3.procedure,claims.f4.procedure,...
         claims.f3.LoS,claims.f4.LoS,...
         claims.f3.specialty,claims.f4.specialty,claims.f3.place,claims.f4.place,numpc(1,i));
+        %}
 end
 result = [numpc',errs1,errs2]
 return
+
+
+
 [yr3_pred c vars] = computeTargetDIH_many3(ages.yr2,genders.yr2,logDIH.yr2,...
     fake_target.ages,fake_target.genders,drugs.features2_1yr,drugs.features3_1yr,...
     lab.features2_1yr,lab.features3_1yr,claims.f2.condGroup,claims.f3.condGroup,...

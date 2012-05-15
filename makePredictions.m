@@ -3,17 +3,13 @@ tic
 allDIH = []; NUM_TARGETS = 0;
 
 try
-    load('makePredictions_11.mat');
+    load('cache/makePredictions_10.mat');
 catch
     target.DIH = computeTargetDIH_sexonly(target,logDIH.genders.yr3);
     allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
     writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
 
     target.DIH = computeTargetDIH_ageonly(target,bins.yr3);
-    allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
-    writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
-
-    target.DIH = computeTargetDIH_DIHonly(target,logDIH,members,true);
     allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
     writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
 
@@ -67,7 +63,7 @@ catch
     allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
     writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
     
-    save('makePredictions_11.mat','allDIH','NUM_TARGETS');
+    save('cache/makePredictions_10.mat','allDIH','NUM_TARGETS');
 end
 
 target.DIH = computeTargetDIH_many3(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
@@ -99,8 +95,9 @@ target.DIH = computeTargetDIH_catvec1_many2(ages.yr3,genders.yr3,logDIH.yr3,targ
 allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
 
-%get median DIH for each member
-target.DIH = median(allDIH(:,10:12),2);
+good = 9:14;
+%get median DIH for each member of our good predictors
+target.DIH = median(allDIH(:,good),2);
 allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
 toc
@@ -110,3 +107,13 @@ target.DIH = median(allDIH,2);
 allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
 toc
+
+%TODO add ridge regression here.
+%{
+yr4_rmse = ?????? Need to get these from the leaderboard
+[target.DIH,weights] = ridgeRegression(allDIH(:,good), LEADERBOARD_VAR,...
+    LEADERBOARD_OPT_CONST, yr4_rmse(good));
+weights'
+allDIH = [allDIH, target.DIH]; NUM_TARGETS = NUM_TARGETS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_TARGETS),target);
+%}
