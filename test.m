@@ -1,5 +1,16 @@
 
+target.DIH = computeTargetDIH_catvec1_agesex(target,ages.yr3,genders.yr3,logDIH.yr3,...
+    target.ages,target.genders);
+writeTarget(sprintf('Target_17.csv'),target);
+[yr3_pred] = computeTargetDIH_catvec1_agesex(fake_target,ages.yr2,genders.yr2,logDIH.yr2,...
+    fake_target.ages,fake_target.genders);
+yr3_pred = postProcess(yr3_pred);
+err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
+disp(sprintf('TEST ERROR %f',err));
 
+return
+
+indices = [9,10,11,13,14];
 indices = 9:14;
 yr3_opt_const = mean(logDIH.yr3);
 yr3_var = mean((logDIH.yr3 - yr3_opt_const).^2);

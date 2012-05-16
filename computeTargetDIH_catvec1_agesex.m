@@ -5,7 +5,7 @@ function [target_DIH, params] = computeTargetDIH_catvec1_agesex(target,ages,gend
 rand('seed',123456);
 % find optimal # of days for age and sex bins
 constants;
-DIM = 4;
+DIM = 1;
 num_bins = SIZE.AGE * SIZE.SEX;
 offset = SIZE.AGE;
 m = length(logDIH);
@@ -44,18 +44,22 @@ for i=1:NITERS
         subject to
             x == reshape((A*g)',DIM*m,1).*reshape((A*f)',DIM*m,1);
     cvx_end
+    disp(sprintf('catvec1_agesex TRAINING ERROR: %f',sqrt((cvx_optval^2)/m)))
     cvx_begin quiet
         variables g(num_bins,DIM) x(DIM*m);
         minimize( norm(B*x - logDIH) )
         subject to
             x == reshape((A*g)',DIM*m,1).*reshape((A*f)',DIM*m,1);
     cvx_end
+    disp(sprintf('catvec1_agesex TRAINING ERROR: %f',sqrt((cvx_optval^2)/m)))
 end
 if ~strcmp(cvx_status,'Solved') && ~strcmp(cvx_status,'Inaccurate/Solved')
     'computeTargetDIH_agesex failed'
     keyboard
 end
 disp(sprintf('catvec1_agesex TRAINING ERROR: %f',sqrt((cvx_optval^2)/m)))
+
+[f,g] = hillClimbCatVec(A,B,f,g,logDIH,DIM);
 
 agesex_test = sparse(1:length(ages_test), agesex_test, 1, length(ages_test), SIZE.AGE*SIZE.SEX);
 M = sparse([agesex_test]);%,drugs_test,lab_test,cond_test,proc_test,los_test,charlson_test,...

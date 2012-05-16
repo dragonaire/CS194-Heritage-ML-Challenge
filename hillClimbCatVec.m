@@ -5,7 +5,7 @@ STEP = 0.000025;
 if nargin >= 7
   indices = 1:maxIndex;
 else
-  indices = 1:length(f);
+  indices = 1:prod(size(f));
 end
 x = reshape((A*g)',DIM*m,1).*reshape((A*f)',DIM*m,1);
 v = B*x;

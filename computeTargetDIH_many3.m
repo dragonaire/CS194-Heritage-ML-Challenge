@@ -125,7 +125,7 @@ catch
 
 end
 %keyboard
-c = hillClimb3(A_pca,c,logDIH,n);
+c = hillClimb3(A_pca,c,logDIH);
 target_DIH = M_pca*c;
 target_DIH = exp(target_DIH)-1;
 end
