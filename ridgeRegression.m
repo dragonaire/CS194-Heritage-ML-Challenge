@@ -30,12 +30,12 @@ targetDIH = preds*weights; %this is in log space.
 targetDIH = targetDIH - mean(targetDIH) + test_opt_const;
 
 
-predicted_error = weights'*(test_mse-var(X)') + ...
+predicted_mse = weights'*(test_mse-var(X)') + ...
     test_var*(1-sum(weights)) + ...
     var(targetDIH);
-predicted_error = sqrt(predicted_error);
-with_overfit = predicted_error + 2*n/m;
-disp(sprintf('predicted_error: %f, with overfitting: %f', predicted_error,with_overfit));
+predicted_rmse = sqrt(predicted_mse);
+with_overfit = sqrt(predicted_mse + 2*n/m);
+disp(sprintf('predicted_mse: %f, with overfitting: %f', predicted_rmse,with_overfit));
 
 
 targetDIH = exp(targetDIH)-1;
