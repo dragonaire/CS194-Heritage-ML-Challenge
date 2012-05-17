@@ -28,7 +28,16 @@ weights = A \ xTy;
 targetDIH = preds*weights; %this is in log space.
 % Re-center the predictions around the target mean. Are we supposed to do this?
 targetDIH = targetDIH - mean(targetDIH) + test_opt_const;
-targetDIH = exp(targetDIH)-1;
 
+
+predicted_error = weights'*(test_mse-var(X)') + ...
+    test_var*(1-sum(weights)) + ...
+    var(targetDIH);
+predicted_error = sqrt(predicted_error);
+with_overfit = predicted_error + 2*n/m;
+disp(sprintf('predicted_error: %f, with overfitting: %f', predicted_error,with_overfit));
+
+
+targetDIH = exp(targetDIH)-1;
 end
 
