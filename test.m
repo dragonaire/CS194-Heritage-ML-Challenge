@@ -1,4 +1,9 @@
 
+target.DIH = computeTargetDIH_catvec1_agesex(target,ages.yr3,genders.yr3,logDIH.yr3,...
+    target.ages,target.genders);
+writeTarget(sprintf('Target_18.csv'),target);
+return
+
 numpc=[85:5:140; 75:5:130];
 numpc=[129:131; 118:120];
 numpc=120*ones(2,1);
@@ -40,9 +45,6 @@ end
 result = [numpc',errs1,errs2]
 return
 
-target.DIH = computeTargetDIH_catvec1_agesex(target,ages.yr3,genders.yr3,logDIH.yr3,...
-    target.ages,target.genders);
-writeTarget(sprintf('Target_17.csv'),target);
 [yr3_pred] = computeTargetDIH_catvec1_agesex(fake_target,ages.yr2,genders.yr2,logDIH.yr2,...
     fake_target.ages,fake_target.genders);
 yr3_pred = postProcess(yr3_pred);

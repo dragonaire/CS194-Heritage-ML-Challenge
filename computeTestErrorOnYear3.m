@@ -175,5 +175,5 @@ yr3_var = mean((logDIH.yr3 - yr3_opt_const).^2);
     yr3_opt_const, yr3_rmse(:));
 err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2));
 disp(sprintf('RIDGE REGRESSION TEST ERROR %f',err));
-weights'
+yr3_weights'
 toc
