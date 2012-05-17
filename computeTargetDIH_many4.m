@@ -97,7 +97,7 @@ catch
     M_pca = scores(:,1:num_pc)*pc(:,1:num_pc)' + M_means;
 end
 %keyboard
-c = hillClimb3(A_pca,c,logDIH);
+c = hillClimb3(A_pca,c,logDIH,n);
 target_DIH = M_pca*c;
 target_DIH = exp(target_DIH)-1;
 end
