@@ -1,7 +1,7 @@
 NUM_TARGETS = 70942;
 NUM_TRAINING = 113000;
 MIN_PREDICTION = 0.057; %TODO find a better way to choose this constant
-MAX_PREDICTION = 14.0; %TODO find a better way to choose this constant
+MAX_PREDICTION = exp(log(15)/2); %==3.8730; %TODO find a better way to choose this constant
 
 LEADERBOARD_OPT_CONST = 0.209179;
 LEADERBOARD_VAR = (0.486459)^2;

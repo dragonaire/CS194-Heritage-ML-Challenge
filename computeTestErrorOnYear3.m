@@ -171,9 +171,9 @@ disp(sprintf('TEST ERROR %f',err));
 % do ridge regression
 yr3_opt_const = mean(logDIH.yr3);
 yr3_var = mean((logDIH.yr3 - yr3_opt_const).^2);
-[yr3_pred,weights] = ridgeRegression(all_yr3_pred(:,good), yr3_var,...
-    yr3_opt_const, yr3_rmse(good));
+[yr3_pred,yr3_weights] = ridgeRegression(all_yr3_pred(:,:), yr3_var,...
+    yr3_opt_const, yr3_rmse(:));
 err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2));
-disp(sprintf('TEST ERROR %f',err));
+disp(sprintf('RIDGE REGRESSION TEST ERROR %f',err));
 weights'
 toc
