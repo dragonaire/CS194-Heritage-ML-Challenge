@@ -6,98 +6,95 @@ constants;
 ZSCORE = false; %TODO must use same means and vars for both A and M
 KERNEL = false;
 num_pc = 156;  % cutoff for number of components to use (max 165)
-try
-    load('alkjsdfdsal');
-    %load('many1.mat');
-catch
-    offsets = [...
-        SIZE.AGE*SIZE.SEX,...%1,...% a constant
-        SIZE.DRUG_1YR,...
-        SIZE.LAB_1YR,...
-        SIZE.COND_GROUP,...
-        SIZE.PROCEDURE,...
-        SIZE.LoS,...
-        SIZE.CHARLSON,...
-        SIZE.SPECIALTY,...
-        SIZE.PLACE,...
-        SIZE.DSFS,...
-        ];
-    offsets = cumsum(offsets);
-    offsets = [0; offsets(1:end)'];
 
-    agesex = ages + 10*(genders-1);
-    nrows = length(agesex);
-    ncols = offsets(2);
-    m = length(ages);
-    n = offsets(end);
-    rows_i = 1:length(agesex);
-    cols_i = agesex;
-    val = 1;
+offsets = [...
+    SIZE.AGE*SIZE.SEX,...%1,...% a constant
+    SIZE.DRUG_1YR,...
+    SIZE.LAB_1YR,...
+    SIZE.COND_GROUP,...
+    SIZE.PROCEDURE,...
+    SIZE.LoS,...
+    SIZE.CHARLSON,...
+    SIZE.SPECIALTY,...
+    SIZE.PLACE,...
+    SIZE.DSFS,...
+    ];
+offsets = cumsum(offsets);
+offsets = [0; offsets(1:end)'];
 
-    % map the data to a new space
-    drugs_train = drugMap(drugs_train);
-    drugs_test = drugMap(drugs_test);
-    lab_train = labMap(lab_train);
-    lab_test = labMap(lab_test);
-    cond_train = condMap(cond_train);
-    cond_test = condMap(cond_test);
-    proc_train = procMap(proc_train);
-    proc_test = procMap(proc_test);
-    los_train = losMap(los_train);
-    los_test = losMap(los_test);
-    charlson_train = charlsonMap(charlson_train);
-    charlson_test = charlsonMap(charlson_test);
-    spec_train = specMap(spec_train);
-    spec_test = specMap(spec_test);
-    place_train = placeMap(place_train);
-    place_test = placeMap(place_test);
-    dsfs_train = dsfsMap(dsfs_train);
-    dsfs_test = dsfsMap(dsfs_test);
+agesex = ages + 10*(genders-1);
+nrows = length(agesex);
+ncols = offsets(2);
+m = length(ages);
+n = offsets(end);
+rows_i = 1:length(agesex);
+cols_i = agesex;
+val = 1;
 
-    A = [full(sparse(rows_i, cols_i, val, nrows, ncols)), ...%ones(m,1), ...
-        drugs_train, lab_train, cond_train, proc_train, los_train, charlson_train,...
-        spec_train, place_train, dsfs_train];
-    [m, n] = size(A);
-    if KERNEL
-        A = sparse(A);
-        A = kernel(A,1);
-        n = n*n;
-    end
-    A = full(A);
-    if ZSCORE
-        [pc,scores,vars] = princomp(zscore(A));
-    end
-    [pc,scores,vars] = princomp(A);
-    
-    A_means = ones(m,1)*mean(A);
-    A_pca = scores(:,1:num_pc)*pc(:,1:num_pc)' + A_means;
-    %A_pca = scores*pc' + A_means;   
-    
-    disp('starting cvx');
-    %A=sparse(A);
-    LosMatrix = -diag(ones(SIZE.LoS-3,1),1)+eye(SIZE.LoS-2);
-    Charlson = -diag(ones(SIZE.CHARLSON-1,1),1)+eye(SIZE.CHARLSON);
-	cvx_clear;
-    cvx_begin quiet
-        variables c(n);
-        minimize(norm(A_pca*c - logDIH))
-        subject to
-            %c(31:end) >= 0;
-            %c(offsets(3:end)) == 0;
-            %c(112:125) == 0; % for not using los
-            % LoS is of increasing badness. except for last 2 columns which had missing data
-            %LosMatrix*c(112:123) <= 0;
-            Charlson*c(126:130) <= 0; % charlson index is of increasing badness
-            %c(126:130) == 0; % for not using charlson index
-            c(153:165) == 0; % for not using DSFS
-    cvx_end
-    if ~strcmp(cvx_status,'Solved') && ~strcmp(cvx_status,'Inaccurate/Solved')
-        'computeTargetDIH_many3 failed'
-        keyboard
-    end
-    optval = norm(A*c-logDIH);
-    %fprintf('computeTargetDIH_many3 TRAINING ERROR: %f\n',sqrt((cvx_optval^2)/m));
-    fprintf('computeTargetDIH_many3 TRAINING ERROR: %f\n',sqrt((optval^2)/m));
+% map the data to a new space
+drugs_train = drugMap(drugs_train);
+drugs_test = drugMap(drugs_test);
+lab_train = labMap(lab_train);
+lab_test = labMap(lab_test);
+cond_train = condMap(cond_train);
+cond_test = condMap(cond_test);
+proc_train = procMap(proc_train);
+proc_test = procMap(proc_test);
+los_train = losMap(los_train);
+los_test = losMap(los_test);
+charlson_train = charlsonMap(charlson_train);
+charlson_test = charlsonMap(charlson_test);
+spec_train = specMap(spec_train);
+spec_test = specMap(spec_test);
+place_train = placeMap(place_train);
+place_test = placeMap(place_test);
+dsfs_train = dsfsMap(dsfs_train);
+dsfs_test = dsfsMap(dsfs_test);
+
+A = [full(sparse(rows_i, cols_i, val, nrows, ncols)), ...%ones(m,1), ...
+    drugs_train, lab_train, cond_train, proc_train, los_train, charlson_train,...
+    spec_train, place_train, dsfs_train];
+[m, n] = size(A);
+if KERNEL
+    A = sparse(A);
+    A = kernel(A,1);
+    n = n*n;
+end
+A = full(A);
+if ZSCORE
+    [pc,scores,vars] = princomp(zscore(A));
+end
+[pc,scores,vars] = princomp(A);
+
+A_means = ones(m,1)*mean(A);
+A_pca = scores(:,1:num_pc)*pc(:,1:num_pc)' + A_means;
+%A_pca = scores*pc' + A_means;   
+
+disp('starting cvx');
+%A=sparse(A);
+LosMatrix = -diag(ones(SIZE.LoS-3,1),1)+eye(SIZE.LoS-2);
+Charlson = -diag(ones(SIZE.CHARLSON-1,1),1)+eye(SIZE.CHARLSON);
+cvx_clear;
+cvx_begin quiet
+    variables c(n);
+    minimize(norm(A_pca*c - logDIH))
+    subject to
+        %c(31:end) >= 0;
+        %c(offsets(3:end)) == 0;
+        %c(112:125) == 0; % for not using los
+        % LoS is of increasing badness. except for last 2 columns which had missing data
+        %LosMatrix*c(112:123) <= 0;
+        Charlson*c(126:130) <= 0; % charlson index is of increasing badness
+        c(126:130) == 0; % for not using charlson index
+        c(153:165) == 0; % for not using DSFS
+cvx_end
+if ~strcmp(cvx_status,'Solved') && ~strcmp(cvx_status,'Inaccurate/Solved')
+    'computeTargetDIH_many3 failed'
+    keyboard
+end
+optval = norm(A*c-logDIH);
+%fprintf('computeTargetDIH_many3 TRAINING ERROR: %f\n',sqrt((cvx_optval^2)/m));
+fprintf('computeTargetDIH_many3 TRAINING ERROR: %f\n',sqrt((optval^2)/m));
 
 %     c_agesex = c(offsets(1)+1:offsets(2));
 %     c_drugs = c(offsets(2)+1:offsets(3));
@@ -109,21 +106,19 @@ catch
 %     c_spec = c(offsets(8)+1:offsets(9));
 %     c_place = c(offsets(9)+1:offsets(10));
 
-    agesex_test = ages_test + 10*(genders_test-1);
-    agesex_test = sparse(1:length(ages_test), agesex_test, 1, length(ages_test), SIZE.AGE*SIZE.SEX);
-    M = sparse([agesex_test,drugs_test,lab_test,cond_test,proc_test,los_test,charlson_test,...
-        spec_test,place_test,dsfs_test]);
-    
-    M = full(M);
-    if ZSCORE
-        [pc,scores,vars] = princomp(zscore(M));
-    end
-    [pc,scores,vars] = princomp(M);
-    
-    M_means = ones(size(M,1),1)*mean(M);
-    M_pca = scores(:,1:num_pc)*pc(:,1:num_pc)' + M_means;
+agesex_test = ages_test + 10*(genders_test-1);
+agesex_test = sparse(1:length(ages_test), agesex_test, 1, length(ages_test), SIZE.AGE*SIZE.SEX);
+M = sparse([agesex_test,drugs_test,lab_test,cond_test,proc_test,los_test,charlson_test,...
+    spec_test,place_test,dsfs_test]);
 
+M = full(M);
+if ZSCORE
+    [pc,scores,vars] = princomp(zscore(M));
 end
+[pc,scores,vars] = princomp(M);
+
+M_means = ones(size(M,1),1)*mean(M);
+M_pca = scores(:,1:num_pc)*pc(:,1:num_pc)' + M_means;
 %keyboard
 c = hillClimb3(A_pca,c,logDIH);
 target_DIH = M_pca*c;

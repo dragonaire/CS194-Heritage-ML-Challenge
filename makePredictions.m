@@ -85,7 +85,7 @@ target.DIH = computeTargetDIH_many3(ages.yr3,genders.yr3,logDIH.yr3,target.ages,
     claims.f3.DSFS,claims.f4.DSFS);
 allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
-yr4_rmse = [yr4_rmse; 0.471158];
+yr4_rmse = [yr4_rmse; 0.468814]; %TODO change this
 
 target.DIH = computeTargetDIH_catvec1_agesex(target,ages.yr3,genders.yr3,logDIH.yr3,...
     target.ages,target.genders);
@@ -130,3 +130,7 @@ indices = find(yr4_rmse > 0);
 weights'
 allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+
+if(max(max(allDIH)) > 15)
+    disp('XXXXXXXXXXXXXXXXXXXXXXXXXXXXX ERROR IN MAKE PREDS');
+end
