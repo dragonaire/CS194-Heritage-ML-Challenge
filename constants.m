@@ -3,7 +3,7 @@ NUM_TRAINING = 113000;
 MIN_PREDICTION = 0.057; %TODO find a better way to choose this constant
 MAX_PREDICTION = exp(log(15+1)/2); %==4; %TODO find a better way to choose this constant
 
-LEADERBOARD_OPT_CONST = 0.209179;
+LEADERBOARD_OPT_CONST = log(0.209179 + 1);
 LEADERBOARD_VAR = (0.486459)^2;
 
 MAXPAYDELAY = 162;

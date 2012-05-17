@@ -21,7 +21,12 @@ xTy = 0.5*(term1+term2+term3);
 A = X'*X + alpha*eye(n);
 weights = A \ xTy;
 
+% normalize the weights to sum to 1. Are we supposed to do this?
+%total = sum(weights);
+%weights = weights / total;
+
 targetDIH = preds*weights; %this is in log space.
+% Re-center the predictions around the target mean. Are we supposed to do this?
 targetDIH = targetDIH - mean(targetDIH) + test_opt_const;
 targetDIH = exp(targetDIH)-1;
 
