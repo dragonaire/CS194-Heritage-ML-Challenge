@@ -140,7 +140,7 @@ end
     f3.nvendors,f4.nvendors,f3.npcps,f4.npcps,f3.extraLoS,f4.extraLoS,f3.n,f4.n);
 allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
-yr4_rmse = [yr4_rmse; 0];
+yr4_rmse = [yr4_rmse; 0.470729];
 
 [target.DIH c4] = computeTargetDIH_many4(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
     drugs.features3_1yr,drugs.features4_1yr,lab.features3_1yr,lab.features4_1yr,...
