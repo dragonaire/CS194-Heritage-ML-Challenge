@@ -38,6 +38,6 @@ for iter=1:100
     end
     vtrain = sqrt(mean((postProcess(v)-logDIH).^2));
     temp=f; f=g; g=temp;
-    disp(sprintf('%d: index %d, train: %f',iter,i,vtrain));
+    %disp(sprintf('hillclimb: %d: index %d, train: %f',iter,i,vtrain));
 end
 end

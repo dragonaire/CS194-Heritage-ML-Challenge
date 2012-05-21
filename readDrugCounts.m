@@ -44,5 +44,18 @@ drugs.features4_1yr = MAX_DRUG_COUNT*(drugs.year-3)+drugs.count;
 drugs.features4_1yr(drugs.features4_1yr<=0) = 0;
 drugs.features4_1yr = formFeaturesMatrix(drugs.features4_1yr, ...
     MAX_DRUG_COUNT, target.memberids, drugs.members);
+
+% add some extra Drug features
+days = [1;2;3;4;5;6;10]; % 10 is just an estimate of the average for 7+
+disp('extra drug features year 2');
+drugs.extrafeatures2 = getExtraFeatures(drugs.features2_1yr,days,0);
+disp('extra drug features year 3');
+drugs.extrafeatures3 = getExtraFeatures(drugs.features3_1yr,days,0);
+disp('extra drug features year 4');
+drugs.extrafeatures4 = getExtraFeatures(drugs.features4_1yr,days,0);
+% remove the empty column for number of missing entries
+drugs.extrafeatures2 = drugs.extrafeatures2(:,[1,2,3,4,6,7]);
+drugs.extrafeatures3 = drugs.extrafeatures3(:,[1,2,3,4,6,7]);
+drugs.extrafeatures4 = drugs.extrafeatures4(:,[1,2,3,4,6,7]);
 save('drugs.mat','drugs');
 end

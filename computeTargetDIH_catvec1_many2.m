@@ -18,7 +18,7 @@ offsets = [0; offsets(1:end)'];
 DIM = 4; NITERS = 2; %TODO need to increase this. but we run out of memory
 DIM = 1; NITERS = 40; %TODO need to increase this. but we run out of memory
 
-agesex = ages + 10*(genders-1);
+agesex = ages + SIZE.AGE*(genders-1);
 nrows = length(agesex);
 ncols = offsets(2);
 m = length(ages);

@@ -1,5 +1,7 @@
 function features = formFeaturesMatrix(f, range, members, feature_members)
-    features = zeros(length(members),range);
+    % length(members) is an underestimate of nnz
+    features = sparse([],[],[],length(members),range,length(members));
+    %features = zeros(length(members),range);
     i=1;
     for m=1:length(members)
         while feature_members(i) <= members(m)
