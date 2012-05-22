@@ -28,7 +28,7 @@ catch
 end
 clear claims;
 try
-    load('cache/makePredictions_24.mat');
+    load('cache/makePredictions_25.mat');
 catch
     target.DIH = computeTargetDIH_sexonly(target,logDIH.genders.yr3);
     allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
@@ -171,7 +171,7 @@ catch
         f3.condSpec,f4.condSpec);
     allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
     writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
-    yr4_rmse = [yr4_rmse; 0];
+    yr4_rmse = [yr4_rmse; 0.468997];
 
     %20
     [target.DIH c4] = computeTargetDIH_condplacecombo(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
@@ -204,27 +204,24 @@ catch
     writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
     yr4_rmse = [yr4_rmse; 0];
     
-    save('cache/makePredictions_24.mat','allDIH','NUM_OUTPUTS','yr4_rmse');
+    %25
+    [target.DIH c4] = computeTargetDIH_n2(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
+    drugs.extrafeatures3,drugs.extrafeatures4,lab.extrafeatures3,lab.extrafeatures4,...
+    f3.nproviders,f4.nproviders,f3.nvendors,f4.nvendors,f3.npcps,f4.npcps,f3.extraLoS,f4.extraLoS,...
+    f3.n,f4.n,f3.nspec,f4.nspec,f3.nplace,f4.nplace,f3.nproc,f4.nproc,f3.ncond,f4.ncond,...
+    f3.extraDSFS,f4.extraDSFS,f3.extraCharlson,f4.extraCharlson,...
+    f3.extraPcpProvVend,f4.extraPcpProvVend);
+    allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+    writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+    yr4_rmse = [yr4_rmse; 0];
+    
+    save('cache/makePredictions_25.mat','allDIH','NUM_OUTPUTS','yr4_rmse');
 end
-
-%get median DIH for each member of our good predictors
-good = 9:20;
-target.DIH = median(allDIH(:,good),2);
-allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
-writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
-yr4_rmse = [yr4_rmse; 0];
 
 %ridge regression.
-indices = find(yr4_rmse > 0);
-%indices = [6,9,11,12,13,14,18,size(allDIH,2)];
-indices = [6,9,12,14,18,size(allDIH,2)];
-indices = [9,12,14,19,20,22];
-indices = [6,9,12,14,19,20,22,23];
-if min(yr4_rmse(indices)) < eps
-    disp('Missing a yr4_rmse');
-    keyboard
-    return
-end
+have = find(yr4_rmse>0);
+[ indices ] = chooseRidgePredictors(allDIH, LEADERBOARD_VAR,...
+    LEADERBOARD_OPT_CONST, yr4_rmse, 0.3, have)
 %indices = indices(indices>=9);
 [target.DIH,weights] = ridgeRegression(allDIH(:,indices), LEADERBOARD_VAR,...
     LEADERBOARD_OPT_CONST, yr4_rmse(indices), 0.3);
@@ -233,6 +230,8 @@ allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
 
 if(max(max(allDIH)) > 15)
+    max(allDIH)
+    min(allDIH)
     disp('XXXXXXXXXXXXXXXXXXXXXXXXXXXXX ERROR IN MAKE PREDS');
 end
 

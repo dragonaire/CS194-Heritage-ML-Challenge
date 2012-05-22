@@ -5,13 +5,13 @@ function [ traits ] = extractMemberTraits( members, subset, all_traits )
 %   all_traits: vector containing a trait for every member
 %   traits: vector containing a trait for every member in subset
 
-traits = zeros(size(subset));
+traits = zeros(size(subset,1),size(all_traits,2));
 j=1;
 for i=1:length(subset)
     while(subset(i) ~= members(j))
         j = j+1;
     end
-    traits(i) = all_traits(j);
+    traits(i,:) = all_traits(j,:);
 end
 
 end
