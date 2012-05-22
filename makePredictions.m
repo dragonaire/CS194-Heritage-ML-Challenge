@@ -178,7 +178,7 @@ catch
         f3.condPlace,f4.condPlace);
     allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
     writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
-    yr4_rmse = [yr4_rmse; 0];
+    yr4_rmse = [yr4_rmse; 0.468812];
 
     %21
     target.DIH = median(allDIH(:,9:14),2);
@@ -219,7 +219,7 @@ indices = find(yr4_rmse > 0);
 %indices = [6,9,11,12,13,14,18,size(allDIH,2)];
 indices = [6,9,12,14,18,size(allDIH,2)];
 indices = [9,12,14,19,20,22];
-indices = [6,9,12,14,19,20,22,23,24];
+indices = [6,9,12,14,19,20,22,23];
 if min(yr4_rmse(indices)) < eps
     disp('Missing a yr4_rmse');
     keyboard

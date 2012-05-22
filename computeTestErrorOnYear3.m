@@ -254,7 +254,7 @@ disp(sprintf('%d TEST ERROR %f',size(all_yr3_pred,2),err));
 % do ridge regression
 %indices = [6,9,11,12,13,14,18,size(all_yr3_pred,2)];
 %indices = [6,9,12,14,18,size(all_yr3_pred,2)];
-indices = [6,9,12,14,19,20,22,23,24];
+indices = [6,9,12,14,19,20,22,23];
 yr3_opt_const = mean(logDIH.yr3);
 yr3_var = mean((logDIH.yr3 - yr3_opt_const).^2);
 [yr3_pred,yr3_weights] = ridgeRegression(all_yr3_pred(:,indices), yr3_var,...
