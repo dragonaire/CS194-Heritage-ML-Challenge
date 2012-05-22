@@ -18,35 +18,35 @@ catch
     % f2
     [phosp,aveLog,numInClass] = ...
         getProbOfHospitalization(claims_y1.pcp,claims_y1.members,members.comb23,logDIH.comb23,SIZE.PCP);
-    [pcp] = addFeatures(claims_y1.pcp,claims_y1.members,phosp,aveLog,numInClass,500,NUM_TRAINING);
+    [pcp] = addFeatures(claims_y1.pcp,claims_y1.members,phosp,aveLog,numInClass,100,NUM_TRAINING);
     [phosp,aveLog,numInClass] = ...
         getProbOfHospitalization(claims_y1.provider,claims_y1.members,members.comb23,logDIH.comb23,SIZE.PROVIDER);
-    [provider] = addFeatures(claims_y1.provider,claims_y1.members,phosp,aveLog,numInClass,500,NUM_TRAINING);
+    [provider] = addFeatures(claims_y1.provider,claims_y1.members,phosp,aveLog,numInClass,250,NUM_TRAINING);
     [phosp,aveLog,numInClass] = ...
         getProbOfHospitalization(claims_y1.vendor,claims_y1.members,members.comb23,logDIH.comb23,SIZE.VENDOR);
-    [vendor] = addFeatures(claims_y1.vendor,claims_y1.members,phosp,aveLog,numInClass,500,NUM_TRAINING);
+    [vendor] = addFeatures(claims_y1.vendor,claims_y1.members,phosp,aveLog,numInClass,200,NUM_TRAINING);
     claims.f2.extraPcpProvVend = extractMemberTraits(members.all,members.yr2,[pcp,provider,vendor]);
     % f3
     [phosp,aveLog,numInClass] = ...
         getProbOfHospitalization(claims_y2.pcp,claims_y2.members,members.comb23,logDIH.comb23,SIZE.PCP);
-    [pcp] = addFeatures(claims_y2.pcp,claims_y2.members,phosp,aveLog,numInClass,500,NUM_TRAINING);
+    [pcp] = addFeatures(claims_y2.pcp,claims_y2.members,phosp,aveLog,numInClass,100,NUM_TRAINING);
     [phosp,aveLog,numInClass] = ...
         getProbOfHospitalization(claims_y2.provider,claims_y2.members,members.comb23,logDIH.comb23,SIZE.PROVIDER);
-    [provider] = addFeatures(claims_y2.provider,claims_y2.members,phosp,aveLog,numInClass,500,NUM_TRAINING);
+    [provider] = addFeatures(claims_y2.provider,claims_y2.members,phosp,aveLog,numInClass,250,NUM_TRAINING);
     [phosp,aveLog,numInClass] = ...
         getProbOfHospitalization(claims_y2.vendor,claims_y2.members,members.comb23,logDIH.comb23,SIZE.VENDOR);
-    [vendor] = addFeatures(claims_y2.vendor,claims_y2.members,phosp,aveLog,numInClass,500,NUM_TRAINING);
+    [vendor] = addFeatures(claims_y2.vendor,claims_y2.members,phosp,aveLog,numInClass,200,NUM_TRAINING);
     claims.f3.extraPcpProvVend = extractMemberTraits(members.all,members.yr3,[pcp,provider,vendor]);
     % f4
     [phosp,aveLog,numInClass] = ...
         getProbOfHospitalization(claims_y3.pcp,claims_y3.members,members.comb23,logDIH.comb23,SIZE.PCP);
-    [pcp] = addFeatures(claims_y3.pcp,claims_y3.members,phosp,aveLog,numInClass,500,NUM_TRAINING);
+    [pcp] = addFeatures(claims_y3.pcp,claims_y3.members,phosp,aveLog,numInClass,100,NUM_TRAINING);
     [phosp,aveLog,numInClass] = ...
         getProbOfHospitalization(claims_y3.provider,claims_y3.members,members.comb23,logDIH.comb23,SIZE.PROVIDER);
-    [provider] = addFeatures(claims_y3.provider,claims_y3.members,phosp,aveLog,numInClass,500,NUM_TRAINING);
+    [provider] = addFeatures(claims_y3.provider,claims_y3.members,phosp,aveLog,numInClass,250,NUM_TRAINING);
     [phosp,aveLog,numInClass] = ...
         getProbOfHospitalization(claims_y3.vendor,claims_y3.members,members.comb23,logDIH.comb23,SIZE.VENDOR);
-    [vendor] = addFeatures(claims_y3.vendor,claims_y3.members,phosp,aveLog,numInClass,500,NUM_TRAINING);
+    [vendor] = addFeatures(claims_y3.vendor,claims_y3.members,phosp,aveLog,numInClass,200,NUM_TRAINING);
     claims.f4.extraPcpProvVend = extractMemberTraits(members.all,target.memberids,[pcp,provider,vendor]);
     
     clear claims_y1;
@@ -84,12 +84,19 @@ for i=1:n
         break;
     end
 end
-phosp = totalHosp./numInClass;
-aveLog = totalLog./numInClass;
+% set to 0 since not all pcps, vendors, and providers are represented in
+% each year.
+phosp = totalHosp./numInClass; phosp(isnan(phosp)) = 0; 
+aveLog = totalLog./numInClass; aveLog(isnan(aveLog)) = 0;
+if min(numInClass) == 0
+    disp('problem in getProbOfHospitalization');
+    %keyboard
+end
 end
 function [fout] = addFeatures(f,members,phosp,aveLog,numInClass,thresh,m)
 members = makeUnique(members,size(unique(members),1),true); % rebucket from 1-113000
 % m is the number of members
+sum((numInClass>=thresh))
 group = (numInClass<thresh);
 numInGroup = sum(numInClass(numInClass<thresh))
 phospgroup = phosp.*numInClass; phospgroup=sum(phospgroup(numInClass<thresh))/numInGroup
@@ -128,21 +135,6 @@ end
 % adds zeros in the place of missing member data
 function [d_] = augment(data,datamems,mems)
 d_ = zeros(size(mems));
-j=1;
-for i=1:length(mems)
-    [datamems(j), mems(i)]
-    while j<=length(datamems) && datamems(j) <= mems(i)
-        d_(i) = data(j);
-        j = j+1;
-    end
-end
-if j==length(datamems)
-    d_(end) = data(end);
-    j=j+1;
-end
-if j-1 ~= length(datamems)
-    disp('error in augment');
-    keyboard
-    a(1)
-end
+[c,ia,ib]=intersect(datamems,mems);
+d_(ib) = data(ia);
 end

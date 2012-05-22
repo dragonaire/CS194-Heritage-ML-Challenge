@@ -12,7 +12,7 @@ toc
 lab = readLabCounts(target,members);
 toc
 %TODO
-%[claims] = add(claims,logDIH,members,target);
+[claims] = add(claims,logDIH,members,target);
 
 %target.condGroup = extractMemberTraits(claim_members, target.memberids, condGroup);
 %target.proc = extractMemberTraits(claim_members, target.memberids, procedure);
