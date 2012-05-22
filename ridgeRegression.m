@@ -2,7 +2,7 @@ function [targetDIH,weights] = ridgeRegression(preds, ...
 	test_var, test_opt_const, leaderboard_scores, quiz_fraction)
 % m_test is the number of predictions for the target year
 m_test = length(preds);
-ALPHA = 0.0006;%0.0015;
+ALPHA = 0.0008;%0.0015;
 alpha = ALPHA*m_test;
 [m,n] = size(preds);
 

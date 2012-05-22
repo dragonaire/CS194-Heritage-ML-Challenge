@@ -1,4 +1,47 @@
+indices = [6,9,12,14,19,20,22,23,24];
+yr3_opt_const = mean(logDIH.yr3);
+yr3_var = mean((logDIH.yr3 - yr3_opt_const).^2);
+[yr3_pred,yr3_weights] = ridgeRegression(all_yr3_pred(:,indices), yr3_var,...
+    yr3_opt_const, yr3_rmse(indices), 1.0);
+err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2));
+disp(sprintf('RIDGE REGRESSION TEST ERROR %f',err));
+yr3_weights'
 
+return
+
+yr3_pred = exp(mean(log(ppp_yr3_pred(:,9:22)+1),2))-1;
+err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2));
+disp(sprintf('%d TEST ERROR %f',size(all_yr3_pred,2),err));
+return
+
+good = 9:20;
+yr3_pred = median(all_yr3_pred(:,good),2);
+err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2));
+disp(sprintf('TEST ERROR %f',err));
+return
+
+load('f2.mat');
+load('f3.mat');
+load('f4.mat');
+
+[yr3_pred c] = computeTargetDIH_condspeccombo(ages.yr2,genders.yr2,logDIH.yr2,...
+    fake_target.ages,fake_target.genders,f2.condSpec,f3.condSpec);
+yr3_pred = postProcess(yr3_pred);
+err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
+disp(sprintf('TEST ERROR %f',err));
+
+[target.DIH c4] = computeTargetDIH_condspeccombo(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
+    f3.condSpec,f4.condSpec);
+return
+[yr3_pred c] = computeTargetDIH_condplacecombo(ages.yr2,genders.yr2,logDIH.yr2,...
+    fake_target.ages,fake_target.genders,f2.condPlace,f3.condPlace);
+yr3_pred = postProcess(yr3_pred);
+err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
+disp(sprintf('TEST ERROR %f',err));
+
+[target.DIH c4] = computeTargetDIH_condplacecombo(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
+    f3.condPlace,f4.condPlace);
+return
 load('f2.mat');
 load('f3.mat');
 load('f4.mat');
