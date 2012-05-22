@@ -177,35 +177,40 @@ all_yr3_pred = [all_yr3_pred, yr3_pred];
     f2.nvendors,f3.nvendors,f2.npcps,f3.npcps,f2.extraLoS,f3.extraLoS,f2.n,f3.n);
 ppp_yr3_pred = [ppp_yr3_pred, yr3_pred]; % pre-post-process
 yr3_pred = postProcess(yr3_pred);
-err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
-disp(sprintf('TEST ERROR %f',err));
 all_yr3_pred = [all_yr3_pred, yr3_pred];
+err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
+disp(sprintf('%d TEST ERROR %f',size(all_yr3_pred,2),err));
 
-good = 10:17;
+[yr3_pred c] = computeTargetDIH_many5(ages.yr2,genders.yr2,logDIH.yr2,...
+    fake_target.ages,fake_target.genders,f2.specPlace,f3.specPlace);
+ppp_yr3_pred = [ppp_yr3_pred, yr3_pred]; % pre-post-process
+yr3_pred = postProcess(yr3_pred);
+all_yr3_pred = [all_yr3_pred, yr3_pred];
+err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
+disp(sprintf('%d TEST ERROR %f',size(all_yr3_pred,2),err));
+
+good = 10:18;
 %get median DIH for each member
 yr3_pred = median(all_yr3_pred(:,good),2);
+all_yr3_pred = [all_yr3_pred, yr3_pred];
 disp('SMALL MEDIAN PREDICTOR');
-err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2));
-disp(sprintf('TEST ERROR %f',err));
-
-%get median DIH for each member
-yr3_pred = median(ppp_yr3_pred(:,good),2);
-yr3_pred = postProcess(yr3_pred);
-disp('PRE-POST-PROCESS SMALL MEDIAN PREDICTOR');
-err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2));
+err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
 disp(sprintf('TEST ERROR %f',err));
 
 %get mean DIH for each member
-yr3_pred = exp(mean(log(all_yr3_pred+1),2))-1;
+yr3_pred = exp(mean(log(ppp_yr3_pred+1),2))-1;
 disp('MEAN PREDICTOR');
 err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2));
 disp(sprintf('TEST ERROR %f',err));
 
 % do ridge regression
+indices = [6,9,11,12,13,14,18,size(all_yr3_pred,2)];
+
+indices = [6,9,12,14,18,size(all_yr3_pred,2)];
 yr3_opt_const = mean(logDIH.yr3);
 yr3_var = mean((logDIH.yr3 - yr3_opt_const).^2);
-[yr3_pred,yr3_weights] = ridgeRegression(all_yr3_pred(:,:), yr3_var,...
-    yr3_opt_const, yr3_rmse(:));
+[yr3_pred,yr3_weights] = ridgeRegression(all_yr3_pred(:,indices), yr3_var,...
+    yr3_opt_const, yr3_rmse(indices), 1.0);
 err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2));
 disp(sprintf('RIDGE REGRESSION TEST ERROR %f',err));
 yr3_weights'

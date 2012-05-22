@@ -1,4 +1,16 @@
 
+load('f2.mat');
+load('f3.mat');
+load('f4.mat');
+[yr3_pred c] = computeTargetDIH_many5(ages.yr2,genders.yr2,logDIH.yr2,...
+    fake_target.ages,fake_target.genders,f2.specPlace,f3.specPlace);
+yr3_pred = postProcess(yr3_pred);
+err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
+disp(sprintf('TEST ERROR %f',err));
+
+[target.DIH c4] = computeTargetDIH_many5(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
+    f3.specPlace,f4.specPlace);
+return
 [yr3_pred c] = computeTargetDIH_catvec1_many3(ages.yr2,genders.yr2,logDIH.yr2,...
     fake_target.ages,fake_target.genders,drugs.extrafeatures2,drugs.extrafeatures3,...
     lab.extrafeatures2,lab.extrafeatures3,f2.nproviders,f3.nproviders,...

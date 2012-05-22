@@ -44,7 +44,7 @@ catch
     allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
     writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
     yr4_rmse = [yr4_rmse; 0.478139];
-
+    
     target.DIH = computeTargetDIH_agesexdrug(target,ages.yr3,genders.yr3,...
         logDIH.yr3,drugs.features3_1yr,drugs.features4_1yr);
     allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
@@ -148,6 +148,8 @@ yr4_rmse = [yr4_rmse; 0.470729];
     f3.specialty,f4.specialty,f3.place,f4.place);
 allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+%yr4_rmse = [yr4_rmse; 0.466098]; %dont include because it causes more
+%overfitting than it's worth
 yr4_rmse = [yr4_rmse; 0];
 
 target.DIH = computeTargetDIH_catvec1_many3(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
@@ -158,7 +160,13 @@ allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
 yr4_rmse = [yr4_rmse; 0];
 
-good = 10:17;
+[target.DIH c4] = computeTargetDIH_many5(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
+    f3.specPlace,f4.specPlace);
+allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+yr4_rmse = [yr4_rmse; 0];
+
+good = 10:18;
 %get median DIH for each member of our good predictors
 target.DIH = median(allDIH(:,good),2);
 allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
@@ -175,8 +183,16 @@ toc
 
 %ridge regression.
 indices = find(yr4_rmse > 0);
+%indices = [6,9,11,12,13,14,18,size(all_yr3_pred,2)];
+indices = [6,9,12,14,18,size(all_yr3_pred,2)];
+if min(yr4_rmse(indices)) < eps
+    disp('Missing a yr4_rmse');
+    keyboard
+    return
+end
+%indices = indices(indices>=9);
 [target.DIH,weights] = ridgeRegression(allDIH(:,indices), LEADERBOARD_VAR,...
-    LEADERBOARD_OPT_CONST, yr4_rmse(indices));
+    LEADERBOARD_OPT_CONST, yr4_rmse(indices), 0.3);
 weights'
 allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);

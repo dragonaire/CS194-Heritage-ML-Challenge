@@ -7,7 +7,7 @@ rand('seed',seed);
 constants;
 %ZSCORE = false; %TODO must use same means and vars for both A and M
 DIM = 1;
-NITERS = 12;
+NITERS = 40;
 
 offsets = [...
     SIZE.AGE*SIZE.SEX,...

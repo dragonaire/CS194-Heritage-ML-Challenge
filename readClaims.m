@@ -158,6 +158,18 @@ claimsForYear.procedure = claims.procedure(yr);
 end
 function featuresForYear = getFeaturesForYear(claimsForYear,target_members,year_members)
 constants
+condSpec = claimsForYear.condGroup + SIZE.COND_GROUP*(claimsForYear.specialty-1);
+featuresForYear.condSpec = formFeaturesMatrix(condSpec, SIZE.COND_GROUP*SIZE.SPECIALTY,...
+    target_members,year_members);
+clear condSpec;
+condPlace = claimsForYear.condGroup + SIZE.COND_GROUP*(claimsForYear.place-1);
+featuresForYear.condPlace = formFeaturesMatrix(condPlace, SIZE.COND_GROUP*SIZE.PLACE,...
+    target_members,year_members);
+clear condPlace;
+specPlace = claimsForYear.specialty + SIZE.SPECIALTY*(claimsForYear.place-1);
+featuresForYear.specPlace = formFeaturesMatrix(specPlace, SIZE.SPECIALTY*SIZE.PLACE,...
+    target_members,year_members);
+clear specPlace;
 featuresForYear.nproviders = countUnique(claimsForYear.provider,SIZE.PROVIDER,target_members,year_members);
 featuresForYear.nvendors = countUnique(claimsForYear.vendor,SIZE.VENDOR,target_members,year_members);
 featuresForYear.npcps = countUnique(claimsForYear.pcp,SIZE.PCP,target_members,year_members);
@@ -175,14 +187,5 @@ featuresForYear.condGroup = formFeaturesMatrix(claimsForYear.condGroup,SIZE.COND
 featuresForYear.charlson = formFeaturesMatrix(claimsForYear.charlson,SIZE.CHARLSON,target_members,year_members);
 featuresForYear.procedure = formFeaturesMatrix(claimsForYear.procedure,SIZE.PROCEDURE,target_members,year_members);
 featuresForYear.n = full(sum(featuresForYear.place,2)); % chose place because it has smallest dimension
-%{
-condSpec = claimsForYear.condGroup + SIZE.COND_GROUP*(claimsForYear.specialty-1);
-featuresForYear.condSpec = formFeaturesMatrix(condSpec, SIZE.COND_GROUP*SIZE.SPECIALTY,...
-    target_members,year_members);
-clear condSpec;
-condPlace = claimsForYear.condGroup + SIZE.COND_GROUP*(claimsForYear.place-1);
-featuresForYear.condPlace = formFeaturesMatrix(condPlace, SIZE.COND_GROUP*SIZE.PLACE,...
-    target_members,year_members);
-clear condPlace;
-%}
+
 end

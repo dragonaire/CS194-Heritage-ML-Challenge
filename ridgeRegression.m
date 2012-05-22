@@ -1,8 +1,8 @@
 function [targetDIH,weights] = ridgeRegression(preds, ...
-	test_var, test_opt_const, leaderboard_scores)
+	test_var, test_opt_const, leaderboard_scores, quiz_fraction)
 % m_test is the number of predictions for the target year
 m_test = length(preds);
-ALPHA = 0.0007;%0.0015;
+ALPHA = 0.0006;%0.0015;
 alpha = ALPHA*m_test;
 [m,n] = size(preds);
 
@@ -29,13 +29,16 @@ targetDIH = preds*weights; %this is in log space.
 % Re-center the predictions around the target mean. Are we supposed to do this?
 targetDIH = targetDIH - mean(targetDIH) + test_opt_const;
 
+% Effective degrees of freedom
+dof = trace2(X,(A\X'));
 
 predicted_mse = weights'*(test_mse-var(X)') + ...
     test_var*(1-sum(weights)) + ...
     var(targetDIH);
 predicted_rmse = sqrt(predicted_mse);
-with_overfit = sqrt(predicted_mse + 2*n/m);
-disp(sprintf('predicted_mse: %f, with overfitting: %f', predicted_rmse,with_overfit));
+with_overfit = sqrt(predicted_mse + 2*dof/(quiz_fraction*m));
+
+disp(sprintf('predicted_mse: %f, with overfitting: %f, DOF %f', predicted_rmse,with_overfit,dof));
 
 
 targetDIH = exp(targetDIH)-1;
