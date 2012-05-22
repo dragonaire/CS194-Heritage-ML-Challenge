@@ -94,98 +94,80 @@ catch
     pcp = makeUnique(claims.pcp,SIZE.PCP);
     save('cache/unique.mat','provider','vendor','pcp');
 end
-claims.provider = provider; clear provider;
-claims.vendor = vendor; clear vendor;
-claims.pcp = pcp; clear pcp;
+try
+    load('cache/claims_mid2.mat');
+catch
+    claims.provider = provider; clear provider;
+    claims.vendor = vendor; clear vendor;
+    claims.pcp = pcp; clear pcp;
 
-%check that parsing went as planned
-'Errors?'
-length(find(claims_year==0))
-length(find(claims.specialty==0))
-length(find(claims.place==0))
-sum(claims.LoS==0)
-length(find(claims.DSFS==0))
-length(find(claims.condGroup==0))
-length(find(claims.charlson==0))
-length(find(claims.procedure==0))
-checkArray(claims_year,1:SIZE.YEAR)
+    %check that parsing went as planned
+    'Errors?'
+    length(find(claims_year==0))
+    length(find(claims.specialty==0))
+    length(find(claims.place==0))
+    sum(claims.LoS==0)
+    length(find(claims.DSFS==0))
+    length(find(claims.condGroup==0))
+    length(find(claims.charlson==0))
+    length(find(claims.procedure==0))
+    checkArray(claims_year,1:SIZE.YEAR)
 
-% Split claims into years and 
-% Calculate features for each year
-disp('Making new features year 1');
-y1 = find(claims_year==1);
-claims_y1 = getClaimsForYear(claims,y1);
-clear y1;
-claims.f2 = getFeaturesForYear(claims_y1,members.yr2,claims_y1.members);
-clear claims_y1;
+    % Split claims into years and 
+    % Calculate features for each year
+    disp('Making new features year 1');
+    y1 = find(claims_year==1);
+    claims_y1 = getClaimsForYear(claims,y1);
+    clear y1;
+    claims.f2 = getFeaturesForYear(claims_y1,members.yr2,claims_y1.members);
+    clear claims_y1;
 
-disp('Making new features year 2');
-y2 = find(claims_year==2);
-claims_y2 = getClaimsForYear(claims,y2);
-clear y2;
-claims.f3 = getFeaturesForYear(claims_y2,members.yr3,claims_y2.members);
-clear claims_y2;
+    disp('Making new features year 2');
+    y2 = find(claims_year==2);
+    claims_y2 = getClaimsForYear(claims,y2);
+    clear y2;
+    claims.f3 = getFeaturesForYear(claims_y2,members.yr3,claims_y2.members);
+    clear claims_y2;
 
-disp('Making new features year 3');
-y3 = find(claims_year==3);
-claims_y3 = getClaimsForYear(claims,y3);
-clear y3;
-claims.f4 = getFeaturesForYear(claims_y3,target.memberids,claims_y3.members);
-clear claims_y3;
-claims.year = claims_year;
+    disp('Making new features year 3');
+    y3 = find(claims_year==3);
+    claims_y3 = getClaimsForYear(claims,y3);
+    clear y3;
+    claims.f4 = getFeaturesForYear(claims_y3,target.memberids,claims_y3.members);
+    clear claims_y3;
+    claims.year = claims_year;
+    save('cache/claims_mid2.mat','claims');
+end
 
+disp('Adding extra features to claims');
+% add some extra DSFS features
+days = [0:11]';
+claims.f2.extraDSFS = getExtraFeatures(claims.f2.DSFS,days,1);
+claims.f3.extraDSFS = getExtraFeatures(claims.f3.DSFS,days,1);
+claims.f4.extraDSFS = getExtraFeatures(claims.f4.DSFS,days,1);
+% keep the ave,min,max,stddev, and add the range
+claims.f2.extraDSFS = ...
+    [claims.f2.extraDSFS(:,1:4),claims.f2.extraDSFS(:,3)-claims.f2.extraDSFS(:,2)];
+claims.f3.extraDSFS = ...
+    [claims.f3.extraDSFS(:,1:4),claims.f3.extraDSFS(:,3)-claims.f3.extraDSFS(:,2)];
+claims.f4.extraDSFS = ...
+    [claims.f4.extraDSFS(:,1:4),claims.f4.extraDSFS(:,3)-claims.f4.extraDSFS(:,2)];
+% add some extra Charlson features
+days = [0;1;2;3;5];
+claims.f2.extraCharlson = getExtraFeatures(claims.f2.charlson,days,0);
+claims.f3.extraCharlson = getExtraFeatures(claims.f3.charlson,days,0);
+claims.f4.extraCharlson = getExtraFeatures(claims.f4.charlson,days,0);
+% keep the ave,min,max,stddev, and add the range
+claims.f2.extraCharlson = [claims.f2.extraCharlson(:,1:4),...
+    claims.f2.extraCharlson(:,3)-claims.f2.extraCharlson(:,2)];
+claims.f3.extraCharlson = [claims.f3.extraCharlson(:,1:4),...
+    claims.f3.extraCharlson(:,3)-claims.f3.extraCharlson(:,2)];
+claims.f4.extraCharlson = [claims.f4.extraCharlson(:,1:4),...
+    claims.f4.extraCharlson(:,3)-claims.f4.extraCharlson(:,2)];
 % add some extra LoS features
 days = [1;2;3;4;5;6;10;21;42;70;133;200];
 claims.f2.extraLoS = getExtraFeatures(claims.f2.LoS,days,2);
 claims.f3.extraLoS = getExtraFeatures(claims.f3.LoS,days,2);
 claims.f4.extraLoS = getExtraFeatures(claims.f4.LoS,days,2);
 save('claims.mat','claims');
-end
-function claimsForYear = getClaimsForYear(claims,yr)
-claimsForYear.members = claims.members(yr);
-claimsForYear.provider = claims.provider(yr);
-claimsForYear.vendor = claims.vendor(yr);
-claimsForYear.pcp = claims.pcp(yr);
-%claimsForYear.year = claims.year(yr);
-claimsForYear.specialty = claims.specialty(yr);
-claimsForYear.place = claims.place(yr);
-claimsForYear.payDelay = claims.payDelay(yr);
-claimsForYear.LoS = claims.LoS(yr);
-claimsForYear.DSFS = claims.DSFS(yr);
-claimsForYear.condGroup = claims.condGroup(yr);
-claimsForYear.charlson = claims.charlson(yr);
-claimsForYear.procedure = claims.procedure(yr);
-end
-function featuresForYear = getFeaturesForYear(claimsForYear,target_members,year_members)
-constants
-condSpec = claimsForYear.condGroup + SIZE.COND_GROUP*(claimsForYear.specialty-1);
-featuresForYear.condSpec = formFeaturesMatrix(condSpec, SIZE.COND_GROUP*SIZE.SPECIALTY,...
-    target_members,year_members);
-clear condSpec;
-condPlace = claimsForYear.condGroup + SIZE.COND_GROUP*(claimsForYear.place-1);
-featuresForYear.condPlace = formFeaturesMatrix(condPlace, SIZE.COND_GROUP*SIZE.PLACE,...
-    target_members,year_members);
-clear condPlace;
-specPlace = claimsForYear.specialty + SIZE.SPECIALTY*(claimsForYear.place-1);
-featuresForYear.specPlace = formFeaturesMatrix(specPlace, SIZE.SPECIALTY*SIZE.PLACE,...
-    target_members,year_members);
-clear specPlace;
-featuresForYear.nproviders = countUnique(claimsForYear.provider,SIZE.PROVIDER,target_members,year_members);
-featuresForYear.nvendors = countUnique(claimsForYear.vendor,SIZE.VENDOR,target_members,year_members);
-featuresForYear.npcps = countUnique(claimsForYear.pcp,SIZE.PCP,target_members,year_members);
-%featuresForYear.members = formFeaturesMatrix(claimsForYear.members,SIZE.,target_members,year_members);
-%featuresForYear.provider = formFeaturesMatrix(claimsForYear.provider,SIZE.,target_members,year_members);
-%featuresForYear.vendor = formFeaturesMatrix(claimsForYear.vendor,SIZE.,target_members,year_members);
-%featuresForYear.pcp = formFeaturesMatrix(claimsForYear.pcp,SIZE.,target_members,year_members);
-%featuresForYear.year = formFeaturesMatrix(claimsForYear.year,SIZE.YEAR,target_members,year_members);
-featuresForYear.specialty = formFeaturesMatrix(claimsForYear.specialty,SIZE.SPECIALTY,target_members,year_members);
-featuresForYear.place = formFeaturesMatrix(claimsForYear.place,SIZE.PLACE,target_members,year_members);
-featuresForYear.payDelay = formFeaturesMatrix(claimsForYear.payDelay,SIZE.PAY_DELAY,target_members,year_members);
-featuresForYear.LoS = formFeaturesMatrix(claimsForYear.LoS,SIZE.LoS,target_members,year_members);
-featuresForYear.DSFS = formFeaturesMatrix(claimsForYear.DSFS,SIZE.DSFS,target_members,year_members);
-featuresForYear.condGroup = formFeaturesMatrix(claimsForYear.condGroup,SIZE.COND_GROUP,target_members,year_members);
-featuresForYear.charlson = formFeaturesMatrix(claimsForYear.charlson,SIZE.CHARLSON,target_members,year_members);
-featuresForYear.procedure = formFeaturesMatrix(claimsForYear.procedure,SIZE.PROCEDURE,target_members,year_members);
-featuresForYear.n = full(sum(featuresForYear.place,2)); % chose place because it has smallest dimension
-
 end
