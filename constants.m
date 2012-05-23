@@ -1,7 +1,9 @@
 NUM_TARGETS = 70942;
 NUM_TRAINING = 113000;
-MIN_PREDICTION = 0.057; %TODO find a better way to choose this constant
-MAX_PREDICTION = exp(log(15+1)/2); %==4; %TODO find a better way to choose this constant
+MIN_PREDICTION_L = 0.054; %For log space. Taken from Market Makers milestone 1
+MAX_PREDICTION_L = log(15+1)/2; %TODO find a better way to choose this constant
+MIN_PREDICTION = exp(MIN_PREDICTION_L)-1;
+MAX_PREDICTION = exp(MAX_PREDICTION_L)-1; %==4; %TODO find a better way to choose this constant
 
 LEADERBOARD_OPT_CONST = log(0.209179 + 1);
 LEADERBOARD_VAR = (0.486459)^2;

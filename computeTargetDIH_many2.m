@@ -66,7 +66,7 @@ catch
         %load('wtf');
         load(sprintf(cache_file,2));
     catch
-        minpred = log(MIN_PREDICTION+1);
+        minpred = MIN_PREDICTION_L;
         %minpred = 0;
         logDIH2 = logDIH.^2;
         logDIH2x = 2*logDIH;

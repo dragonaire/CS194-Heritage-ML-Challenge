@@ -1,12 +1,12 @@
-% Assumes p is in log space
-function [ p ] = postProcess(p)
+% Assumes p is in normal space, not log space.
+function [ p ] = postProcessReal(p)
 constants;
-p = min(max(p, MIN_PREDICTION_L), MAX_PREDICTION_L);
+p = min(max(p, MIN_PREDICTION), MAX_PREDICTION);
 return;
 CUTOFF = 0.058;
 DECAY = 0.7;
 p_exp = exp(DECAY*p) * (CUTOFF / exp(DECAY*CUTOFF));
-p = min(p,MAX_PREDICTION_L);
+p = min(p,MAX_PREDICTION);
 p(p<CUTOFF) = p_exp(p<CUTOFF);
 
 %{
