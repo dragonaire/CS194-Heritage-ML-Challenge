@@ -21,7 +21,7 @@ while cur_best<prev_best
         end
         [x,y,z,cur] = ridgeRegression(preds(:,[set;i]),test_var,test_opt_const,...
             leaderboard_scores([set;i]),quiz_fraction);
-        if cur<cur_best
+        if cur<prev_best && cur<cur_best
             cur_best=cur;
             cur_i = i;
         end
@@ -41,9 +41,10 @@ while cur_best2<prev_best2
     cur_best2 = 1e10;
     cur_i = 0;
     for i=1:length(set2)
-        [x,y,z,cur] = ridgeRegression(preds(:,[set2(1:i-1);set2(i+1:end)]),test_var,test_opt_const,...
-            leaderboard_scores([set2(1:i-1);set2(i+1:end)]),quiz_fraction);
-        if cur<cur_best2
+        tmpset = [set2(1:i-1);set2(i+1:end)]'
+        [x,y,z,cur] = ridgeRegression(preds(:,tmpset),test_var,test_opt_const,...
+            leaderboard_scores(tmpset),quiz_fraction);
+        if cur<prev_best2 && cur<cur_best2
             cur_best2=cur;
             cur_i = i;
         end
@@ -57,7 +58,7 @@ end
 fprintf('best 1: %f, best 2: %f\n',min(cur_best,prev_best),min(cur_best2,prev_best2));
 set'
 set2'
-if cur_best>cur_best2
+if min(cur_best,prev_best)>min(cur_best2,prev_best2)
     set=set2;
 end
 end

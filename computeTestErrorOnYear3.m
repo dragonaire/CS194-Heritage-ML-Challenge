@@ -257,14 +257,10 @@ catch
 end
 
 %get median DIH for each member
-good = 9:20;
+good = 9:22;
 yr3_pred = median(all_yr3_pred(:,good),2);
-%ppp_yr3_pred = [ppp_yr3_pred, yr3_pred]; % pre-post-process
-%yr3_pred = postProcess(yr3_pred);
-all_yr3_pred = [all_yr3_pred, yr3_pred];
-disp('SMALL MEDIAN PREDICTOR');
-err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
-disp(sprintf('%d TEST ERROR %f',size(all_yr3_pred,2),err));
+err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2));
+disp(sprintf('SMALL MEDIAN PREDICTOR TEST ERROR %f',err));
 
 % do ridge regression
 yr3_opt_const = mean(logDIH.yr3);
