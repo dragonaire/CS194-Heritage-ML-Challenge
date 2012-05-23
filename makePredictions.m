@@ -30,27 +30,31 @@ clear claims;
 try
     load('cache/makePredictions_25.mat');
 catch
+    %1
     target.DIH = computeTargetDIH_sexonly(target,logDIH.genders.yr3);
     allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
     writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
     yr4_rmse = [yr4_rmse; 0];
 
+    %2
     target.DIH = computeTargetDIH_ageonly(target,bins.yr3);
     allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
     writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
     yr4_rmse = [yr4_rmse; 0];
 
+    %3
     target.DIH = computeTargetDIH_agesex(target,ages.yr3,genders.yr3,logDIH.yr3);
     allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
     writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
     yr4_rmse = [yr4_rmse; 0.478139];
-    
+    %4
     target.DIH = computeTargetDIH_agesexdrug(target,ages.yr3,genders.yr3,...
         logDIH.yr3,drugs.features3_1yr,drugs.features4_1yr);
     allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
     writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
     yr4_rmse = [yr4_rmse; 0];
 
+    %5
     target.DIH = computeTargetDIH_agesexdruglab(ages.yr3,genders.yr3,logDIH.yr3,...
         target.ages,target.genders,drugs.features3_1yr,drugs.features4_1yr,...
         lab.features3_1yr,lab.features4_1yr);
@@ -58,6 +62,7 @@ catch
     writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
     yr4_rmse = [yr4_rmse; 0];
 
+    %6
     target.DIH = computeTargetDIH_agesexdruglab_sqrt(ages.yr3,genders.yr3,logDIH.yr3,...
         target.ages,target.genders,drugs.features3_1yr,drugs.features4_1yr,...
         lab.features3_1yr,lab.features4_1yr);
@@ -65,6 +70,7 @@ catch
     writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
     yr4_rmse = [yr4_rmse; 0];
 
+    %7
     target.DIH = computeTargetDIH_agesexcombo_druglab(ages.yr3,genders.yr3,logDIH.yr3,...
         target.ages,target.genders,drugs.features3_1yr,drugs.features4_1yr,...
         lab.features3_1yr,lab.features4_1yr);
@@ -72,6 +78,7 @@ catch
     writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
     yr4_rmse = [yr4_rmse; 0.475212];
 
+    %8
     target.DIH = computeTargetDIH_agesexcombo_druglabcondproc(ages.yr3,genders.yr3,logDIH.yr3,...
         target.ages,target.genders,drugs.features3_1yr,drugs.features4_1yr,...
         lab.features3_1yr,lab.features4_1yr,f3.condGroup,f4.condGroup,...
@@ -80,6 +87,7 @@ catch
     writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
     yr4_rmse = [yr4_rmse; 0.468767];
 
+    %9
     target.DIH = computeTargetDIH_agesexcombo_druglabcondproc_loscharlson(...
         ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
         drugs.features3_1yr,drugs.features4_1yr,lab.features3_1yr,lab.features4_1yr,...
@@ -89,6 +97,7 @@ catch
     writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
     yr4_rmse = [yr4_rmse; 0.465748];
 
+    %10
     target.DIH = computeTargetDIH_many1(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
         drugs.features3_1yr,drugs.features4_1yr,lab.features3_1yr,lab.features4_1yr,...
         f3.condGroup,f4.condGroup,f3.procedure,f4.procedure,...
@@ -98,6 +107,7 @@ catch
     writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
     yr4_rmse = [yr4_rmse; 0.465563];
     
+    %11
     target.DIH = computeTargetDIH_many3(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
         drugs.features3_1yr,drugs.features4_1yr,lab.features3_1yr,lab.features4_1yr,...
         f3.condGroup,f4.condGroup,f3.procedure,f4.procedure,...
@@ -108,12 +118,14 @@ catch
     writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
     yr4_rmse = [yr4_rmse; 0.466453];
 
+    %12
     target.DIH = computeTargetDIH_catvec1_agesex(target,ages.yr3,genders.yr3,logDIH.yr3,...
         target.ages,target.genders);
     allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
     writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
     yr4_rmse = [yr4_rmse; 0.477704];
 
+    %13
     target.DIH = computeTargetDIH_catvec1_many1(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
         drugs.features3_1yr,drugs.features4_1yr,lab.features3_1yr,lab.features4_1yr,...
         f3.condGroup,f4.condGroup,f3.procedure,f4.procedure,...

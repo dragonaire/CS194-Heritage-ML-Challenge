@@ -1,4 +1,6 @@
+ens = fitensemble(ages.yr2,logDIH.yr2,'LSBoost',10,'tree')
 
+return
 load('f2.mat');
 load('f3.mat');
 load('f4.mat');

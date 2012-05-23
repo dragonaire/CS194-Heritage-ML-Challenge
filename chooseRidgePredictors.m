@@ -41,7 +41,7 @@ while cur_best2<prev_best2
     cur_best2 = 1e10;
     cur_i = 0;
     for i=1:length(set2)
-        tmpset = [set2(1:i-1);set2(i+1:end)]'
+        tmpset = [set2(1:i-1);set2(i+1:end)]';
         [x,y,z,cur] = ridgeRegression(preds(:,tmpset),test_var,test_opt_const,...
             leaderboard_scores(tmpset),quiz_fraction);
         if cur<prev_best2 && cur<cur_best2
