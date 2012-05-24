@@ -1,4 +1,24 @@
+load('f2.mat');
+load('f3.mat');
+load('f4.mat');
+[yr3_pred] = computeTargetDIH_b1(ages.yr2,genders.yr2,logDIH.yr2,...
+    fake_target.ages,fake_target.genders,drugs.features2_1yr,drugs.features3_1yr,...
+    lab.features2_1yr,lab.features3_1yr,f2.condGroup,f3.condGroup,...
+    f2.procedure,f3.procedure,f2.specialty,f3.specialty,f2.place,f3.place);
+yr3_pred = postProcess(yr3_pred);
+err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
+disp(sprintf('TEST ERROR %f',err));
+
+[target.DIH] = computeTargetDIH_b1(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
+    drugs.features3_1yr,drugs.features4_1yr,lab.features3_1yr,lab.features4_1yr,...
+    f3.condGroup,f4.condGroup,f3.procedure,f4.procedure,...
+    f3.specialty,f4.specialty,f3.place,f4.place);
+return
+
 ens = fitensemble(ages.yr2,logDIH.yr2,'LSBoost',10,'tree')
+yr3_pred = predict(ens, ages.yr3);
+err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2));
+disp(sprintf('TEST ERROR %f',err));
 
 return
 load('f2.mat');
@@ -123,23 +143,6 @@ target.DIH = computeTargetDIH_catvec1_many3(ages.yr3,genders.yr3,logDIH.yr3,targ
     f3.nvendors,f4.nvendors,f3.npcps,f4.npcps,f3.extraLoS,f4.extraLoS,f3.n,f4.n);
 return
 
-
-load('f2.mat');
-load('f3.mat');
-load('f4.mat');
-[yr3_pred c] = computeTargetDIH_many4(ages.yr2,genders.yr2,logDIH.yr2,...
-    fake_target.ages,fake_target.genders,drugs.features2_1yr,drugs.features3_1yr,...
-    lab.features2_1yr,lab.features3_1yr,f2.condGroup,f3.condGroup,...
-    f2.procedure,f3.procedure,f2.specialty,f3.specialty,f2.place,f3.place);
-yr3_pred = postProcess(yr3_pred);
-err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
-disp(sprintf('TEST ERROR %f',err));
-
-[target.DIH c4] = computeTargetDIH_many4(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
-    drugs.features3_1yr,drugs.features4_1yr,lab.features3_1yr,lab.features4_1yr,...
-    f3.condGroup,f4.condGroup,f3.procedure,f4.procedure,...
-    f3.specialty,f4.specialty,f3.place,f4.place);
-return
 
 [yr3_pred c] = computeTargetDIH_many3(ages.yr2,genders.yr2,logDIH.yr2,...
     fake_target.ages,fake_target.genders,drugs.features2_1yr,drugs.features3_1yr,...
