@@ -2,8 +2,8 @@ function [target_DIH] = computeTargetDIH_b1(ages,genders,logDIH,...
     ages_test,genders_test,drugs_train,drugs_test,lab_train,lab_test,cond_train,cond_test,...
     proc_train,proc_test,spec_train,spec_test,place_train,place_test)
 constants;
-NTREES = 100;
-NFOLDS = 10;
+NTREES = 1000;
+NFOLDS = 12;
 
 offsets = [...
     SIZE.AGE*SIZE.SEX,...%1,...% a constant
@@ -59,32 +59,38 @@ catch
   r=randperm(m);
   logDIH = logDIH(r);
   A = A(r,:);
+  train_preds = zeros(m,NFOLDS);
+  test_preds = zeros(m_test,NFOLDS);
   for i=1:NFOLDS
-    first = round(m*(i-1)/NFOLDS)
-    last = round(m*i/NFOLDS)+1
-    B = [A(1:first,:);A(last:end,:)];
-    logB = [logDIH(1:first);logDIH(last:end)];
-    ens{i} = fitensemble(B,logB,'LSBoost',NTREES,'tree');
+    fprintf('Trees: %d, Fitting ensemble %d of %d\n', NTREES,i,NFOLDS);
+    try
+      load(sprintf('cache/ens_b1_TREES%d_m%d_iter%d.mat',NTREES,m,i));
+    catch
+      first = round(m*(i-1)/NFOLDS);
+      last = round(m*i/NFOLDS)+1;
+      B = [A(1:first,:);A(last:end,:)];
+      logB = [logDIH(1:first);logDIH(last:end)];
+      ens = fitensemble(B,logB,'LSBoost',NTREES,'tree');
+      train_pred = predict(ens, A);
+      test_pred = predict(ens, M);
+      save(sprintf('cache/ens_b1_TREES%d_m%d_iter%d.mat',NTREES,m,i),...
+        'train_pred','test_pred');
+    end
+    err = sqrt(mean((logDIH-postProcess(train_pred)).^2));
+    fprintf('%d Trees. FOLD %d TRAINING ERROR: %f\n',NTREES,i,err);
+    train_preds(:,i) = train_pred;
+    test_preds(:,i) = test_pred;
   end
   %ens = fitensemble(A,logDIH,'LSBoost',NTREES,'tree','kfold',10);
-  save(sprintf('cache/ens_b1_TREES%d_m%d.mat',NTREES,m),'ens');
+  train_preds = mean(train_preds,2);
+  err = sqrt(mean((logDIH-postProcess(train_preds)).^2));
+  test_preds = mean(test_preds,2);
+  %save(sprintf('cache/ens_b1_TREES%d_m%d.mat',NTREES,m),'ens');
+  save(sprintf('cache/ens_b1_TREES%d_m%d.mat',NTREES,m),'train_preds', ...
+    'test_preds','err');
 end
-disp('testing ensemble');
-train_pred = zeros(m,NFOLDS);
-for i=1:NFOLDS
-  train_pred(:,i) = predict(ens{i}, A);
-end
-train_pred = mean(train_pred,2);
-
-err = sqrt(mean((logDIH-postProcess(train_pred)).^2));
-fprintf('computeTargetDIH_b1 TRAINING ERROR: %f\n',err);
-
-test_pred = zeros(m_test,NFOLDS);
-for i=1:NFOLDS
-  test_pred(:,i) = predict(ens{i}, M);
-end
-test_pred = mean(test_pred,2);
-target_DIH = test_pred;
+fprintf('computeTargetDIH_b1 %d Trees. TRAINING ERROR: %f\n',NTREES,err);
+target_DIH = test_preds;
 target_DIH = exp(target_DIH)-1;
 end
 %TODO these functions make the arrays unsparse. Subtract the min value to

@@ -1,6 +1,7 @@
 load('f2.mat');
 load('f3.mat');
 load('f4.mat');
+tic
 [yr3_pred] = computeTargetDIH_b1(ages.yr2,genders.yr2,logDIH.yr2,...
     fake_target.ages,fake_target.genders,drugs.features2_1yr,drugs.features3_1yr,...
     lab.features2_1yr,lab.features3_1yr,f2.condGroup,f3.condGroup,...
@@ -8,11 +9,13 @@ load('f4.mat');
 yr3_pred = postProcess(yr3_pred);
 err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
 disp(sprintf('TEST ERROR %f',err));
-
+toc
+tic
 [target.DIH] = computeTargetDIH_b1(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
     drugs.features3_1yr,drugs.features4_1yr,lab.features3_1yr,lab.features4_1yr,...
     f3.condGroup,f4.condGroup,f3.procedure,f4.procedure,...
     f3.specialty,f4.specialty,f3.place,f4.place);
+toc
 return
 
 ens = fitensemble(ages.yr2,logDIH.yr2,'LSBoost',10,'tree')

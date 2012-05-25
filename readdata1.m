@@ -7,9 +7,9 @@ target = readTarget(members, genders, ages);
 toc
 claims = readClaims(target,members);
 toc
-drugs = readDrugCounts(target,members);
-toc
 lab = readLabCounts(target,members);
+toc
+drugs = readDrugCounts(target,members);
 toc
 %TODO
 [claims] = add(claims,logDIH,members,target);
