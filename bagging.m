@@ -1,4 +1,4 @@
-function [b, p, e] = bagging(ntrees, minleaf)
+function [b, p, e, Y] = bagging(ntrees, minleaf)
 
 % TODO: run with much larger value of ntrees in parallel
 
@@ -26,9 +26,27 @@ Y = logDIH.yr3;
 
 % ntrees = 2000;
 % minleaf = 10;
-b = TreeBagger(ntrees,X,Y,'method','regression','OOBPred','on','minleaf',minleaf);
+
+matlabpool local 6
+options = statset('UseParallel','Always');
+
+tic
+fprintf('TreeBagger computing...\n');
+b = TreeBagger(ntrees,X,Y,'method','regression','OOBPred','on','minleaf',minleaf,'Options',options);
+toc
+fprintf('TreeBagger finished\n');
 p = oobPredict(b);
 e = oobError(b);
+matlabpool close
+%save('tbag1000.mat','b','p','e');
+X = [target.ages, target.genders, ...
+     drugs.features4_1yr, lab.features4_1yr, ..
+     claims.f4.condGroup, claims.f4.procedure, ...
+     claims.f4.specialty, claims.f4.place];
+X = full(X);
+
+Y = predict(b,X);
+Y = exp(Y)-1;
     
 % leaf = 0:100:2000;
 % leaf = [5 10 30 50 leaf(2:end)];
