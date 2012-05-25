@@ -36,8 +36,8 @@ cols_i = agesex;
 val = 1;
 
 % map the data to a new space
-ndrugs_train = drugMap(ndrugs_train);
-ndrugs_test = drugMap(ndrugs_test);
+ndrugs_train = ndrugMap(ndrugs_train);
+ndrugs_test = ndrugMap(ndrugs_test);
 nlab_train = nlabMap(nlab_train);
 nlab_test = nlabMap(nlab_test);
 nprov_train = nprovMap(nprov_train);
@@ -106,7 +106,7 @@ end
 function x = nvendMap(x)
 x=x.^0.9;
 end
-function x = drugMap(x)
+function x = ndrugMap(x)
 x=x.^0.65;
 end
 function x = nlabMap(x)
