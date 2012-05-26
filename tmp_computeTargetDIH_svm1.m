@@ -7,10 +7,8 @@ function [target_DIH] = computeTargetDIH_svm1(ages,genders,logDIH,...
     nclaims_train,nclaims_test,nspec_train,nspec_test,nplace_train,nplace_test,...
     nproc_train,nproc_test,ncond_train,ncond_test,extradsfs_train,extradsfs_test,...
     exchar_train,exchar_test,extraprob_train,extraprob_test)
-NGROUPS = 25;
+NGROUPS = 5;
 NCOLS = 133;
-%NCOLS = 30;
-%NCOLS = 47;
 try
   m = length(ages);
   load(sprintf('cache/computeTargetDIH_svm1_m%d_cols%d_groups%d.mat', m,NCOLS,NGROUPS));
@@ -110,8 +108,8 @@ catch
   M = full(M);
   randn('seed',123);
   r = randperm(m);
-  A = A(r,1:NCOLS);
-  M = M(:,1:NCOLS);
+  A = A(r,NCOLS);
+  M = M(:,NCOLS);
   logDIH=logDIH(r);
   [m, n] = size(A);
   [m_test, n] = size(M);
@@ -132,33 +130,31 @@ catch
     p = p + svmclassify(s,A);
     p_test = p_test + svmclassify(s,M);
   end
-  save(sprintf('cache/computeTargetDIH_svm1_m%d_cols%d_groups%d.mat',m,NCOLS,NGROUPS),...
-    'p','p_test','logDIH');
-end
-m_test = size(p_test,1);
-P = [ones(m,1), p.^0.1, p.^0.3, p.^0.5, p.^0.8, p,  ...
-  log(p+1), exp(0.1*p)];
-P_test = [ones(m_test,1), p_test.^0.1, p_test.^0.3, p_test.^0.5, p_test.^0.8,...
-  p_test,  ...
-  log(p_test+1), exp(0.1*p_test)];
+  P=[ones(m,1),p,p.^2,p.^3,sqrt(p),log(p+1),exp(p)];
+  P_test=[ones(m_test,1),p_test,p_test.^2,p_test.^3,sqrt(p_test),log(p_test+1),exp(p_test)];
 
-cvx_clear;
-cvx_begin quiet
-    variables c(8);
-    minimize(norm(P*c-logDIH))
-    subject to
-cvx_end
-if ~strcmp(cvx_status,'Solved') && ~strcmp(cvx_status,'Inaccurate/Solved')
-    'computeTargetDIH_svm1 failed'
-    keyboard
-end
-optval = norm(postProcess(P*c)-logDIH);
-fprintf('computeTargetDIH_svm1 TRAINING ERROR: %f\n',sqrt((optval^2)/m));
+  logDIHhosp = logDIH(p==1);
+  logDIHnot = logDIH(p==0);
+  disp('starting cvx');
+  cvx_clear;
+  cvx_begin quiet
+      variables c(7);
+      minimize(norm(P*c-logDIH))
+      subject to
+  cvx_end
+  if ~strcmp(cvx_status,'Solved') && ~strcmp(cvx_status,'Inaccurate/Solved')
+      'computeTargetDIH_svm1 failed'
+      keyboard
+  end
+  fprintf('c: %f\n', c);
+  optval = norm(P*c-logDIH)
+  %fprintf('computeTargetDIH_svm1 TRAINING ERROR: %f\n',sqrt((cvx_optval^2)/m));
+  fprintf('computeTargetDIH_svm1 TRAINING ERROR: %f\n',sqrt((optval^2)/m));
 
-c = hillClimb3(P,c,logDIH);
-%target_DIH = b+c*p_test;
-target_DIH = P_test*c;
-target_DIH = exp(target_DIH)-1;
+  target_DIH = P_test*c;
+  target_DIH = exp(target_DIH)-1;
+  save(sprintf('cache/computeTargetDIH_svm1_m%d_cols%d_groups%d.mat',m,NCOLS,NGROUPS), 'target_DIH');
+end
 end
 %TODO these functions make the arrays unsparse. Subtract the min value to
 %make them sparse again

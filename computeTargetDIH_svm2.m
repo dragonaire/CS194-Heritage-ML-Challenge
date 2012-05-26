@@ -1,4 +1,4 @@
-function [target_DIH] = computeTargetDIH_svm1(ages,genders,logDIH,...
+function [target_DIH] = computeTargetDIH_svm2(ages,genders,logDIH,...
     ages_test,genders_test,drugs_train,drugs_test,lab_train,lab_test,cond_train,cond_test,...
     proc_train,proc_test,...
     spec_train,spec_test,place_train,place_test,...
@@ -7,13 +7,11 @@ function [target_DIH] = computeTargetDIH_svm1(ages,genders,logDIH,...
     nclaims_train,nclaims_test,nspec_train,nspec_test,nplace_train,nplace_test,...
     nproc_train,nproc_test,ncond_train,ncond_test,extradsfs_train,extradsfs_test,...
     exchar_train,exchar_test,extraprob_train,extraprob_test)
-NGROUPS = 25;
+NGROUPS = 5;
 NCOLS = 133;
-%NCOLS = 30;
-%NCOLS = 47;
 try
   m = length(ages);
-  load(sprintf('cache/computeTargetDIH_svm1_m%d_cols%d_groups%d.mat', m,NCOLS,NGROUPS));
+  load(sprintf('cache/computeTargetDIH_svm2_m%d_cols%d_groups%d.mat', m,NCOLS,NGROUPS));
 catch
   constants;
   ZSCORE = false; %TODO must use same means and vars for both A and M
@@ -120,45 +118,45 @@ catch
   options = statset('Display','iter','MaxIter',10000000);
   options = statset('Display','off','MaxIter',10000000);
   %s = svmtrain(A,logical(logDIH),'options',options,'kktviolationlevel',0.01);
-  p = zeros(m,1);
-  p_test = zeros(m_test,1);
-  for i=1:NGROUPS
-    fprintf('ITER %d\n', i);
-    first = round((m*(i-1))/NGROUPS)+1;
-    last = round((m*i)/NGROUPS);
-    B = A(first:last,:);
-    logB = logDIH(first:last);
-    s = svmtrain(B,logical(logB),'options',options);
-    p = p + svmclassify(s,A);
-    p_test = p_test + svmclassify(s,M);
+  p = zeros(m,length(offsets)-1);
+  p_test = zeros(m_test,length(offsets)-1);
+  for j=1:length(offsets)-1
+    for i=1:NGROUPS
+      fprintf('ITER %d\n', i);
+      first = round((m*(i-1))/NGROUPS)+1;
+      last = round((m*i)/NGROUPS);
+      [offsets(j)+1,offsets(j+1)]
+      B = A(first:last,offsets(j)+1:offsets(j+1));
+      logB = logDIH(first:last);
+      s = svmtrain(B,logical(logB),'options',options);
+      p(:,j) = p(:,j) + svmclassify(s,A(:,offsets(j)+1:offsets(j+1)));
+      p_test(:,j) = p_test(:,j) + svmclassify(s,M);
+    end
   end
-  save(sprintf('cache/computeTargetDIH_svm1_m%d_cols%d_groups%d.mat',m,NCOLS,NGROUPS),...
-    'p','p_test','logDIH');
-end
-m_test = size(p_test,1);
-P = [ones(m,1), p.^0.1, p.^0.3, p.^0.5, p.^0.8, p,  ...
-  log(p+1), exp(0.1*p)];
-P_test = [ones(m_test,1), p_test.^0.1, p_test.^0.3, p_test.^0.5, p_test.^0.8,...
-  p_test,  ...
-  log(p_test+1), exp(0.1*p_test)];
 
-cvx_clear;
-cvx_begin quiet
-    variables c(8);
-    minimize(norm(P*c-logDIH))
-    subject to
-cvx_end
-if ~strcmp(cvx_status,'Solved') && ~strcmp(cvx_status,'Inaccurate/Solved')
-    'computeTargetDIH_svm1 failed'
-    keyboard
-end
-optval = norm(postProcess(P*c)-logDIH);
-fprintf('computeTargetDIH_svm1 TRAINING ERROR: %f\n',sqrt((optval^2)/m));
+  logDIHhosp = logDIH(p==1);
+  logDIHnot = logDIH(p==0);
+  disp('starting cvx');
+  cvx_clear;
+  cvx_begin quiet
+      variables b c;
+      minimize(norm(logDIH-b-c*p))
+      subject to
+        c >= 0;
+  cvx_end
+  if ~strcmp(cvx_status,'Solved') && ~strcmp(cvx_status,'Inaccurate/Solved')
+      'computeTargetDIH_svm2 failed'
+      keyboard
+  end
+  fprintf('b: %f, c: %f\n', b, c);
+  optval = norm(logDIH-b-c*p);
+  %fprintf('computeTargetDIH_svm2 TRAINING ERROR: %f\n',sqrt((cvx_optval^2)/m));
+  fprintf('computeTargetDIH_svm2 TRAINING ERROR: %f\n',sqrt((optval^2)/m));
 
-c = hillClimb3(P,c,logDIH);
-%target_DIH = b+c*p_test;
-target_DIH = P_test*c;
-target_DIH = exp(target_DIH)-1;
+  target_DIH = b+c*p_test;
+  target_DIH = exp(target_DIH)-1;
+  save(sprintf('cache/computeTargetDIH_svm2_m%d_cols%d_groups%d.mat',m,NCOLS,NGROUPS), 'target_DIH');
+end
 end
 %TODO these functions make the arrays unsparse. Subtract the min value to
 %make them sparse again
