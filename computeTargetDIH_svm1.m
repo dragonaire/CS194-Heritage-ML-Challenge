@@ -11,6 +11,7 @@ NGROUPS = 25;
 NCOLS = 133;
 %NCOLS = 30;
 %NCOLS = 47;
+NCOLS = 182;
 try
   m = length(ages);
   load(sprintf('cache/computeTargetDIH_svm1_m%d_cols%d_groups%d.mat', m,NCOLS,NGROUPS));
@@ -44,7 +45,7 @@ catch
       SIZE.EXTRAPROB,...
       ];
   offsets = cumsum(offsets);
-  offsets = [0; offsets(1:end)'];
+  offsets = [0; offsets(1:end)']
 
   agesex = ages + 10*(genders-1);
   nrows = length(agesex);
@@ -113,8 +114,8 @@ catch
   A = A(r,1:NCOLS);
   M = M(:,1:NCOLS);
   logDIH=logDIH(r);
-  [m, n] = size(A);
-  [m_test, n] = size(M);
+  m = size(A,1);
+  m_test = size(M,1);
 
   disp('training and testing svm');
   options = statset('Display','iter','MaxIter',10000000);
@@ -137,14 +138,15 @@ catch
 end
 m_test = size(p_test,1);
 P = [ones(m,1), p.^0.1, p.^0.3, p.^0.5, p.^0.8, p,  ...
-  log(p+1), exp(0.1*p)];
+  log(p+1), exp(0.1*p), log(p+0.3)];
 P_test = [ones(m_test,1), p_test.^0.1, p_test.^0.3, p_test.^0.5, p_test.^0.8,...
   p_test,  ...
-  log(p_test+1), exp(0.1*p_test)];
+  log(p_test+1), exp(0.1*p_test), log(p_test+0.3)];
+n = size(P,2);
 
 cvx_clear;
 cvx_begin quiet
-    variables c(8);
+    variables c(n);
     minimize(norm(P*c-logDIH))
     subject to
 cvx_end
@@ -156,7 +158,6 @@ optval = norm(postProcess(P*c)-logDIH);
 fprintf('computeTargetDIH_svm1 TRAINING ERROR: %f\n',sqrt((optval^2)/m));
 
 c = hillClimb3(P,c,logDIH);
-%target_DIH = b+c*p_test;
 target_DIH = P_test*c;
 target_DIH = exp(target_DIH)-1;
 end
