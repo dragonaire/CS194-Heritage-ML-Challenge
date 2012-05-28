@@ -1,8 +1,13 @@
-function [targetDIH,weights,predicted_rmse,with_overfit] = ridgeRegression(preds, ...
-	test_var, test_opt_const, leaderboard_scores, quiz_fraction)
+function [targetDIH,with_overfit,weights,predicted_rmse] = ridgeRegression(preds, ...
+	indices, args)%test_var, test_opt_const, leaderboard_scores, quiz_fraction)
+preds=preds(:,indices);
+test_var=args{1};
+test_opt_const=args{2};
+leaderboard_scores=args{3}(indices);
+quiz_fraction=args{4};
 % m_test is the number of predictions for the target year
 m_test = length(preds);
-ALPHA = 0.0008;%0.0015;
+ALPHA = 0.0015;%0.0015;
 alpha = ALPHA*m_test;
 [m,n] = size(preds);
 
@@ -38,7 +43,7 @@ predicted_mse = weights'*(test_mse-var(X)') + ...
 predicted_rmse = sqrt(predicted_mse);
 with_overfit = sqrt(predicted_mse + 2*dof/(quiz_fraction*m));
 
-disp(sprintf('predicted_mse: %f, with overfitting: %f, DOF %f', predicted_rmse,with_overfit,dof));
+%fprintf('predicted_mse: %f, with overfitting: %f, DOF %f\n', predicted_rmse,with_overfit,dof);
 
 
 targetDIH = exp(targetDIH)-1;

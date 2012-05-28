@@ -1,3 +1,5 @@
+[ set ] = choosePredictors(1,2,3)
+return
 load('f2.mat');
 load('f3.mat');
 load('f4.mat');

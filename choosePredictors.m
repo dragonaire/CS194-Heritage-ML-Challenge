@@ -1,5 +1,4 @@
-function [ set ] = chooseRidgePredictors(fh,preds, ...
-	test_var, test_opt_const, leaderboard_scores, quiz_fraction,indices)
+function [ set ] = choosePredictors(fh,preds,indices,varargin)
 if size(indices,2) > 1
     if size(indices,1) > 1
         disp('ERROR IN chooseRidgePredictors');
@@ -19,8 +18,7 @@ while cur_best<prev_best
         if length(unique([set;i])) == length(set)
             continue
         end
-        [x,cur,y,z] = ridgeRegression(preds(:,[set;i]),test_var,test_opt_const,...
-            leaderboard_scores([set;i]),quiz_fraction);
+        [x,cur] = fh(preds,[set;i],varargin);
         if cur<prev_best && cur<cur_best
             cur_best=cur;
             cur_i = i;
@@ -42,8 +40,7 @@ while cur_best2<prev_best2
     cur_i = 0;
     for i=1:length(set2)
         tmpset = [set2(1:i-1);set2(i+1:end)]';
-        [x,cur,y,z] = ridgeRegression(preds(:,tmpset),test_var,test_opt_const,...
-            leaderboard_scores(tmpset),quiz_fraction);
+        [x,cur] = fh(preds,tmpset,varargin);
         if cur<prev_best2 && cur<cur_best2
             cur_best2=cur;
             cur_i = i;
@@ -56,8 +53,6 @@ while cur_best2<prev_best2
 end
 % return the better sets
 fprintf('best 1: %f, best 2: %f\n',min(cur_best,prev_best),min(cur_best2,prev_best2));
-set'
-set2'
 if min(cur_best,prev_best)>min(cur_best2,prev_best2)
     set=set2;
 end
