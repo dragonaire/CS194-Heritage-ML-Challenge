@@ -28,7 +28,7 @@ catch
 end
 clear claims;
 try
-    load('cache/makePredictions_27.mat');
+    load('cache/makePredictions_29.mat');
 catch
     %1
     target.DIH = computeTargetDIH_sexonly(target,logDIH.genders.yr3);
@@ -234,7 +234,6 @@ catch
     yr4_rmse = [yr4_rmse; 0.462822];
 
     %27
-    %TODO get rid of DSFS
     [target.DIH c4] = computeTargetDIH_many6(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
         drugs.features3_1yr,drugs.features4_1yr,lab.features3_1yr,lab.features4_1yr,...
         f3.condGroup,f4.condGroup,f3.procedure,f4.procedure,...
@@ -247,43 +246,50 @@ catch
     allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
     writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
     yr4_rmse = [yr4_rmse; 0];
+
+    %28
+    median(allDIH(:,[1,3,9,10,11,12,13,14,16,17,19,21,25,26,27]),2);
+    allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+    writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+    yr4_rmse = [yr4_rmse; 0.465448];
+
+    %29
+    [target.DIH] = computeTargetDIH_svm1(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
+        drugs.features3_1yr,drugs.features4_1yr,lab.features3_1yr,lab.features4_1yr,...
+        f3.condGroup,f4.condGroup,f3.procedure,f4.procedure,...
+        f3.specialty,f4.specialty,f3.place,f4.place,...
+        drugs.extrafeatures3,drugs.extrafeatures4,lab.extrafeatures3,lab.extrafeatures4,...
+        f3.nproviders,f4.nproviders,f3.nvendors,f4.nvendors,f3.npcps,f4.npcps,f3.extraLoS,f4.extraLoS,...
+        f3.n,f4.n,f3.nspec,f4.nspec,f3.nplace,f4.nplace,f3.nproc,f4.nproc,f3.ncond,f4.ncond,...
+        f3.extraDSFS,f4.extraDSFS,f3.extraCharlson,f4.extraCharlson,...
+        f3.extraPcpProvVend,f4.extraPcpProvVend);
+    allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+    writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+    yr4_rmse = [yr4_rmse; 0.471183];
     
-    
-    save('cache/makePredictions_27.mat','allDIH','NUM_OUTPUTS','yr4_rmse');
+    save('cache/makePredictions_29.mat','allDIH','NUM_OUTPUTS','yr4_rmse');
 end
 
-%28
-median(allDIH(:,[1,3,9,10,11,12,13,14,16,17,19,21,25,26,27]),2);
+%30
+% choose the median + offset in the index
+tmp_allDIH = [allDIH,zeros(size(allDIH,1),5),15*ones(size(allDIH,1),5)];
+target.DIH = median(tmp_allDIH(:,[1,9,10,13,14,16,17,19,21,26:31]),2);
+clear tmp_allDIH;
 allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
-yr4_rmse = [yr4_rmse; 0.462038];
-
-%29
-[target.DIH] = computeTargetDIH_svm1(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
-    drugs.features3_1yr,drugs.features4_1yr,lab.features3_1yr,lab.features4_1yr,...
-    f3.condGroup,f4.condGroup,f3.procedure,f4.procedure,...
-    f3.specialty,f4.specialty,f3.place,f4.place,...
-    drugs.extrafeatures3,drugs.extrafeatures4,lab.extrafeatures3,lab.extrafeatures4,...
-    f3.nproviders,f4.nproviders,f3.nvendors,f4.nvendors,f3.npcps,f4.npcps,f3.extraLoS,f4.extraLoS,...
-    f3.n,f4.n,f3.nspec,f4.nspec,f3.nplace,f4.nplace,f3.nproc,f4.nproc,f3.ncond,f4.ncond,...
-    f3.extraDSFS,f4.extraDSFS,f3.extraCharlson,f4.extraCharlson,...
-    f3.extraPcpProvVend,f4.extraPcpProvVend);
-allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
-writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
-yr4_rmse = [yr4_rmse; 0];
+yr4_rmse = [yr4_rmse; 0.465258];
 
 %ridge regression.
 allDIH = postProcessReal(allDIH);
 have = find(yr4_rmse>0);
 [ indices ] = choosePredictors(@ridgeRegression, allDIH, have, LEADERBOARD_VAR,...
     LEADERBOARD_OPT_CONST, yr4_rmse, 0.3)
-%indices = indices(indices>=9);
 [target.DIH,with_overfit,weights] = ridgeRegression(allDIH,indices,...
     {LEADERBOARD_VAR,LEADERBOARD_OPT_CONST, yr4_rmse, 0.3});
-
 weights'
 allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+fprintf('RIDGE REGRESSION PREDICTED ERROR %f\n',with_overfit);
 
 if(max(max(allDIH)) > 15)
     max(allDIH)
