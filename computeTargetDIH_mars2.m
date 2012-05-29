@@ -7,6 +7,7 @@ function [target_DIH] = computeTargetDIH_mars2(ages,genders,logDIH,...
     nclaims_train,nclaims_test,nspec_train,nspec_test,nplace_train,nplace_test,...
     nproc_train,nproc_test,ncond_train,ncond_test,extradsfs_train,extradsfs_test,...
     exchar_train,exchar_test,extraprob_train,extraprob_test)
+addpath('ARESlab');
 NGROUPS = 1;
 constants;
 ZSCORE = false; %TODO must use same means and vars for both A and M
@@ -111,6 +112,8 @@ logDIH=logDIH(r);
 MAXFUNCS = 21;
 MAXFUNCS = 30;
 MAXFUNCS = 60;
+MAXFUNCS = 80;
+MAXFUNCS = 300;
 try
   load(sprintf('cache/computeTargetDIH_mars2_m%d_max%d.mat', m,MAXFUNCS));
 catch
