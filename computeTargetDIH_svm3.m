@@ -1,4 +1,4 @@
-function [target_DIH] = computeTargetDIH_svm2(ages,genders,logDIH,...
+function [target_DIH] = computeTargetDIH_svm3(ages,genders,logDIH,...
     ages_test,genders_test,drugs_train,drugs_test,lab_train,lab_test,cond_train,cond_test,...
     proc_train,proc_test,...
     spec_train,spec_test,place_train,place_test,...
@@ -7,7 +7,7 @@ function [target_DIH] = computeTargetDIH_svm2(ages,genders,logDIH,...
     nclaims_train,nclaims_test,nspec_train,nspec_test,nplace_train,nplace_test,...
     nproc_train,nproc_test,ncond_train,ncond_test,extradsfs_train,extradsfs_test,...
     exchar_train,exchar_test,extraprob_train,extraprob_test)
-NGROUPS = 5;
+NGROUPS = 25;
 m = length(ages);
 constants;
 ZSCORE = false; %TODO must use same means and vars for both A and M
@@ -110,14 +110,14 @@ logDIH=logDIH(r);
 m = size(A,1);
 m_test = size(M,1);
 
-disp('training and testing svm2');
+disp('training and testing svm3');
 options = statset('Display','iter','MaxIter',10000000);
 options = statset('Display','off','MaxIter',10000000);
 p = zeros(m,length(offsets)-1);
 p_test = zeros(m_test,length(offsets)-1);
 for j=1:length(offsets)-1
   try
-    filename = sprintf('cache/computeTargetDIH_svm2_m%d_group%d_offset%d.mat', m, NGROUPS, j);
+    filename = sprintf('cache/computeTargetDIH_svm2_m%d_group%d_offset%d.mat', m, 10, j);
     load(filename);
   catch
     fprintf('Using indices %d - %d \n', offsets(j)+1,offsets(j+1));
@@ -132,14 +132,45 @@ for j=1:length(offsets)-1
       p(:,j) = p(:,j) + svmclassify(s,A(:,cols));
       p_test(:,j) = p_test(:,j) + svmclassify(s,M(:,cols));
     end
-    save(sprintf('cache/computeTargetDIH_svm2_m%d_group%d_offset%d.mat', m, NGROUPS, j),...
+    save(sprintf('cache/computeTargetDIH_svm2_m%d_group%d_offset%d.mat', m, 10, j),...
       'p', 'p_test');
   end
 end
+p10 = p;
+p_test10 = p_test;
+
+p = zeros(m,length(offsets)-1);
+p_test = zeros(m_test,length(offsets)-1);
+for j=1:length(offsets)-1
+  try
+    filename = sprintf('cache/computeTargetDIH_svm2_m%d_group%d_offset%d.mat', m, 25, j);
+    load(filename);
+  catch
+    fprintf('Using indices %d - %d \n', offsets(j)+1,offsets(j+1));
+    cols = offsets(j)+1:offsets(j+1);
+    for i=1:NGROUPS
+      fprintf('ITER %d\n', i);
+      first = round((m*(i-1))/NGROUPS)+1;
+      last = round((m*i)/NGROUPS);
+      B = A(first:last,offsets(j)+1:offsets(j+1));
+      logB = logDIH(first:last);
+      s = svmtrain(B,logical(logB),'options',options);
+      p(:,j) = p(:,j) + svmclassify(s,A(:,cols));
+      p_test(:,j) = p_test(:,j) + svmclassify(s,M(:,cols));
+    end
+    save(sprintf('cache/computeTargetDIH_svm2_m%d_group%d_offset%d.mat', m, 25, j),...
+      'p', 'p_test');
+  end
+end
+p25 = p;
+p_test25 = p_test;
 
 m_test = size(p_test,1);
-P = [p, p.^1.5, p.^2.0, p.^0.5, log(p+0.05)];
-P_test = [p_test, p_test.^1.5, p_test.^2.0, p_test.^0.5, log(p_test+0.05)];
+[m, m_test]
+P = [p10, p25];
+P_test = [p_test10, p_test25];
+%P = [p, p.^1.5, p.^2.0, p.^0.5, log(p+0.05)];
+%P_test = [p_test, p_test.^1.5, p_test.^2.0, p_test.^0.5, log(p_test+0.05)];
 %{
 P = [ones(m,1), p.^0.1, p.^0.3, p.^0.5, p.^0.8, p,  ...
   log(p+1), exp(0.1*p), log(p+0.3)];
@@ -151,6 +182,17 @@ P_test = [ones(m_test,1), p_test.^0.1, p_test.^0.3, p_test.^0.5, p_test.^0.8,...
 %P_test = p_test;
 %P = kernel(p,2);
 %P_test = kernel(p_test,3);
+
+% combine svm1 and svm2
+load(sprintf('cache/computeTargetDIH_svm1_m%d_cols182_groups25.mat', m));
+P1 = [ones(m,1), p.^0.1, p.^0.3, p.^0.5, p.^0.8, p,  ...
+  log(p+1), exp(0.1*p), log(p+0.3)];
+P_test1 = [ones(m_test,1), p_test.^0.1, p_test.^0.3, p_test.^0.5, p_test.^0.8,...
+  p_test,  ...
+  log(p_test+1), exp(0.1*p_test), log(p_test+0.3)];
+P = [P, P1];
+P_test = [P_test, P_test1];
+
 n = size(P,2);
 
 disp('starting cvx');
@@ -161,15 +203,15 @@ cvx_begin quiet
     subject to
 cvx_end
 if ~strcmp(cvx_status,'Solved') && ~strcmp(cvx_status,'Inaccurate/Solved')
-    'computeTargetDIH_svm2 failed'
+    'computeTargetDIH_svm3 failed'
     keyboard
 end
 optval = norm(postProcess(P*c)-logDIH);
-fprintf('computeTargetDIH_svm2 TRAINING ERROR: %f\n',sqrt((optval^2)/m));
+fprintf('computeTargetDIH_svm3 TRAINING ERROR: %f\n',sqrt((optval^2)/m));
 
 c = hillClimb3(P,c,logDIH);
 optval = norm(postProcess(P*c)-logDIH);
-fprintf('computeTargetDIH_svm2 HILLCLIMB TRAINING ERROR: %f\n',sqrt((optval^2)/m));
+fprintf('computeTargetDIH_svm3 HILLCLIMB TRAINING ERROR: %f\n',sqrt((optval^2)/m));
 target_DIH = P_test*c;
 target_DIH = exp(target_DIH)-1;
 end

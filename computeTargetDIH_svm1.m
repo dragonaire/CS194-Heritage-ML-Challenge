@@ -109,6 +109,7 @@ catch
       npcp_test,extralos_test,nclaims_test,nspec_test,nplace_test,nproc_test,ncond_test,...
       extradsfs_test,exchar_test,extraprob_test]);
   M = full(M);
+  rand('seed',123);
   randn('seed',123);
   r = randperm(m);
   A = A(r,1:NCOLS);
@@ -117,10 +118,9 @@ catch
   m = size(A,1);
   m_test = size(M,1);
 
-  disp('training and testing svm');
+  disp('training and testing svm1');
   options = statset('Display','iter','MaxIter',10000000);
   options = statset('Display','off','MaxIter',10000000);
-  %s = svmtrain(A,logical(logDIH),'options',options,'kktviolationlevel',0.01);
   p = zeros(m,1);
   p_test = zeros(m_test,1);
   for i=1:NGROUPS
