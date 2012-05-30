@@ -112,11 +112,13 @@ logDIH=logDIH(r);
 MAXFUNCS = 21;
 MAXFUNCS = 30;
 MAXFUNCS = 60;
-MAXFUNCS = 80;
-MAXFUNCS = 300;
+MAXFUNCS = 100;
+%MAXFUNCS = 300;
 try
   load(sprintf('cache/computeTargetDIH_mars2_m%d_max%d.mat', m,MAXFUNCS));
 catch
+  %load(sprintf('cache/computeTargetDIH_mars2_m%d_max%d.mat', m,60));
+  %modelOld = model;
   trainParams = aresparams(..., 
     MAXFUNCS,...%21,...%maxFuncs,
     3,...%c,

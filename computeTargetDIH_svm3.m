@@ -103,15 +103,15 @@ M = sparse([agesex_test,drugs_test,lab_test,cond_test,proc_test,...
     extradsfs_test,exchar_test,extraprob_test]);
 M = full(M);
 rand('seed',123);
-randn('seed',123);
+randn('seed',123); %must be the same as the seed in svm1 and svm2
 r = randperm(m);
 A = A(r,:);
 logDIH=logDIH(r);
 m = size(A,1);
 m_test = size(M,1);
 
-target_DIH = zeros(m_test,1);
-groups=[5:5:25];
+groups=[5,10,15,20,25];
+target_DIH = zeros(m_test,length(groups)+1);
 for i=1:length(groups)
   g = groups(i);
   for j=1:length(offsets)-1
@@ -123,8 +123,11 @@ for i=1:length(groups)
         keyboard
     end
   end
-  P = [p, p.^1.5, p.^2.0, p.^0.5, log(p+0.05)];
-  P_test = [p_test, p_test.^1.5, p_test.^2.0, p_test.^0.5, log(p_test+0.05)];
+  P = [p, p.^1.5, p.^2.0, p.^0.5, log(p+0.1)];
+  P_test = [p_test, p_test.^1.5, p_test.^2.0, p_test.^0.5, log(p_test+0.1)];
+  
+  %P=p;
+  %P_test = p_test;
   n = size(P,2);
   cvx_clear;
   cvx_begin quiet
@@ -140,7 +143,7 @@ for i=1:length(groups)
   c = hillClimb3(P,c,logDIH);
   optval = norm(postProcess(P*c)-logDIH);
   fprintf('computeTargetDIH_svm3 HILLCLIMB TRAINING ERROR: %f\n',sqrt((optval^2)/m));
-  target_DIH = target_DIH + P_test*c;
+  target_DIH(:,i) = P_test*c;
 end
 
 %m_test = size(p_test,1);
@@ -185,8 +188,8 @@ fprintf('computeTargetDIH_svm3 TRAINING ERROR: %f\n',sqrt((optval^2)/m));
 c = hillClimb3(P,c,logDIH);
 optval = norm(postProcess(P*c)-logDIH);
 fprintf('computeTargetDIH_svm3 HILLCLIMB TRAINING ERROR: %f\n',sqrt((optval^2)/m));
-target_DIH = target_DIH + P_test*c;
-target_DIH = target_DIH / (length(groups)+1);
+target_DIH(:,end) = P_test*c;
+target_DIH = median(target_DIH,2);
 target_DIH = exp(target_DIH)-1;
 end
 %TODO these functions make the arrays unsparse. Subtract the min value to
