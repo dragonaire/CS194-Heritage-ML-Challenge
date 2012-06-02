@@ -6,14 +6,13 @@ test_opt_const=args{2};
 leaderboard_scores=args{3}(indices);
 quiz_fraction=args{4};
 % m_test is the number of predictions for the target year
-m_test = length(preds);
+[m_test,n] = size(preds);
 ALPHA = 0.0015;%0.0015;
 alpha = ALPHA*m_test;
-[m,n] = size(preds);
 
 % preds is in day space so change it to log space
 preds = log(preds+1);
-Xmeans = repmat(mean(preds),m,1);
+Xmeans = repmat(mean(preds),m_test,1);
 X = preds - Xmeans;
 
 % See http://www.netflixprize.com/assets/GrandPrize2009_BPC_BigChaos.pdf Section 7
@@ -41,7 +40,7 @@ predicted_mse = weights'*(test_mse-var(X)') + ...
     test_var*(1-sum(weights)) + ...
     var(targetDIH);
 predicted_rmse = sqrt(predicted_mse);
-with_overfit = sqrt(predicted_mse + 2*dof/(quiz_fraction*m));
+with_overfit = sqrt(predicted_mse + 2*dof/(quiz_fraction*m_test));
 
 %fprintf('predicted_mse: %f, with overfitting: %f, DOF %f\n', predicted_rmse,with_overfit,dof);
 

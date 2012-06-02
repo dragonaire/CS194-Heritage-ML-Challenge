@@ -356,6 +356,12 @@ yr3_pred = median(all_yr3_pred(:,27:29),2);
 err = sqrt(mean((logDIH.yr3-log(yr3_pred+1)).^2));
 disp(sprintf('SMALL MEDIAN PREDICTOR TEST ERROR %f',err));
 
+%testing mean RR
+[yr3_pred,yr3_weights] = meanRidgeRegression(all_yr3_pred, indices, ...
+    {yr3_var, yr3_opt_const, yr3_rmse, 1.0});
+err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2));
+disp(sprintf('MEAN RIDGE REGRESSION TEST ERROR %f',err));
+
 % do ridge regression
 yr3_opt_const = mean(logDIH.yr3);
 yr3_var = mean((logDIH.yr3 - yr3_opt_const).^2);
