@@ -14,7 +14,7 @@ yr3_rmse = [];
 load('f2.mat');
 load('f3.mat');
 try
-    load('cache/computeTestErrorYr3_29.mat');
+    load('cache/computeTestErrorYr3_31.mat');
 catch
     yr3_pred = computeTargetDIH_sexonly(fake_target,logDIH.genders.yr2);
     ppp_yr3_pred = [ppp_yr3_pred, yr3_pred]; % pre-post-process
@@ -303,38 +303,37 @@ catch
     err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
     disp(sprintf('%d TEST ERROR %f',size(all_yr3_pred,2),err));
 
-    save('cache/computeTestErrorYr3_29.mat','all_yr3_pred','ppp_yr3_pred','yr3_rmse');
+    %30
+    % choose the median + offset in the index
+    tmp_yr3_pred = [all_yr3_pred,zeros(size(all_yr3_pred,1),5),15*ones(size(all_yr3_pred,1),5)];
+    [ good ] = choosePredictors(@chooseMedian, tmp_yr3_pred, 1:size(tmp_yr3_pred,2),logDIH.yr3);
+    yr3_pred = median(tmp_yr3_pred(:,good),2);
+    ppp_yr3_pred = [ppp_yr3_pred, yr3_pred]; % pre-post-process
+    yr3_pred = postProcessReal(yr3_pred);
+    all_yr3_pred = [all_yr3_pred, yr3_pred];
+    clear tmp_yr3_pred;
+    err = sqrt(mean((logDIH.yr3-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
+    disp(sprintf('BEST MEDIAN PREDICTOR TEST ERROR %f',err));
+
+    %31
+    [yr3_pred] = computeTargetDIH_svm3(ages.yr2,genders.yr2,logDIH.yr2,...
+        fake_target.ages,fake_target.genders,drugs.features2_1yr,drugs.features3_1yr,...
+        lab.features2_1yr,lab.features3_1yr,f2.condGroup,f3.condGroup,...
+        f2.procedure,f3.procedure,f2.specialty,f3.specialty,...
+        f2.place,f3.place,drugs.extrafeatures2,drugs.extrafeatures3,...
+        lab.extrafeatures2,lab.extrafeatures3,f2.nproviders,f3.nproviders,...
+        f2.nvendors,f3.nvendors,f2.npcps,f3.npcps,f2.extraLoS,f3.extraLoS,f2.n,f3.n,...
+        f2.nspec,f3.nspec,f2.nplace,f3.nplace,f2.nproc,f3.nproc,f2.ncond,f3.ncond,...
+        f2.extraDSFS,f3.extraDSFS,f2.extraCharlson,f3.extraCharlson,...
+        f2.extraPcpProvVend,f3.extraPcpProvVend);
+    ppp_yr3_pred = [ppp_yr3_pred, yr3_pred]; % pre-post-process
+    yr3_pred = postProcessReal(yr3_pred);
+    all_yr3_pred = [all_yr3_pred, yr3_pred];
+    err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
+    disp(sprintf('%d TEST ERROR %f',size(all_yr3_pred,2),err));
+
+    save('cache/computeTestErrorYr3_31.mat','all_yr3_pred','ppp_yr3_pred','yr3_rmse');
 end
-    
-
-%30
-% choose the median + offset in the index
-tmp_yr3_pred = [all_yr3_pred,zeros(size(all_yr3_pred,1),5),15*ones(size(all_yr3_pred,1),5)];
-[ good ] = choosePredictors(@chooseMedian, tmp_yr3_pred, 1:size(tmp_yr3_pred,2),logDIH.yr3);
-yr3_pred = median(tmp_yr3_pred(:,good),2);
-ppp_yr3_pred = [ppp_yr3_pred, yr3_pred]; % pre-post-process
-yr3_pred = postProcessReal(yr3_pred);
-all_yr3_pred = [all_yr3_pred, yr3_pred];
-clear tmp_yr3_pred;
-err = sqrt(mean((logDIH.yr3-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
-disp(sprintf('BEST MEDIAN PREDICTOR TEST ERROR %f',err));
-
-%31
-[yr3_pred] = computeTargetDIH_svm3(ages.yr2,genders.yr2,logDIH.yr2,...
-    fake_target.ages,fake_target.genders,drugs.features2_1yr,drugs.features3_1yr,...
-    lab.features2_1yr,lab.features3_1yr,f2.condGroup,f3.condGroup,...
-    f2.procedure,f3.procedure,f2.specialty,f3.specialty,...
-    f2.place,f3.place,drugs.extrafeatures2,drugs.extrafeatures3,...
-    lab.extrafeatures2,lab.extrafeatures3,f2.nproviders,f3.nproviders,...
-    f2.nvendors,f3.nvendors,f2.npcps,f3.npcps,f2.extraLoS,f3.extraLoS,f2.n,f3.n,...
-    f2.nspec,f3.nspec,f2.nplace,f3.nplace,f2.nproc,f3.nproc,f2.ncond,f3.ncond,...
-    f2.extraDSFS,f3.extraDSFS,f2.extraCharlson,f3.extraCharlson,...
-    f2.extraPcpProvVend,f3.extraPcpProvVend);
-ppp_yr3_pred = [ppp_yr3_pred, yr3_pred]; % pre-post-process
-yr3_pred = postProcessReal(yr3_pred);
-all_yr3_pred = [all_yr3_pred, yr3_pred];
-err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
-disp(sprintf('%d TEST ERROR %f',size(all_yr3_pred,2),err));
 
 %32
 [yr3_pred] = computeTargetDIH_mars2(ages.yr2,genders.yr2,logDIH.yr2,...

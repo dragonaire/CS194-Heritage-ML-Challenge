@@ -109,33 +109,57 @@ A = A(r,:);
 logDIH=logDIH(r);
 [m_test, n] = size(M);
 
-MAXFUNCS = 21;
-MAXFUNCS = 30;
-MAXFUNCS = 60;
-MAXFUNCS = 100;
+target_DIH = zeros(m_test,1);
+%MAXFUNCS = 21;
+%MAXFUNCS = 30;
+%MAXFUNCS = 60;
+%MAXFUNCS = 100;
 %MAXFUNCS = 300;
-try
-  load(sprintf('cache/computeTargetDIH_mars2_m%d_max%d.mat', m,MAXFUNCS));
-catch
-  %load(sprintf('cache/computeTargetDIH_mars2_m%d_max%d.mat', m,60));
-  %modelOld = model;
-  trainParams = aresparams(..., 
-    MAXFUNCS,...%21,...%maxFuncs,
-    3,...%c,
-    true,...%cubic,
-    2,...%cubicFastLevel,
-    1,...%selfInteractions,
-    1,...%maxInteractions,
-    1e-4,...%threshold,
-    true,...%prune,
-    -1,...%useMinSpan,
-    -1,...%useEndSpan,
-    Inf);%maxFinalFuncs
-  [model, time] = aresbuild(A, logDIH, trainParams);
-  save(sprintf('cache/computeTargetDIH_mars2_m%d_max%d.mat',m,MAXFUNCS), 'model');
+all = [140];
+%weights = [0.2, 1.0];
+weights = [1.0];
+for i=1:length(all)
+  MAXFUNCS = all(i);
+  try
+    load(sprintf('cache/computeTargetDIH_mars2_m%d_max%d.mat', m,MAXFUNCS));
+  catch
+    try
+      load(sprintf('cache/computeTargetDIH_mars2_m%d_max%d_notpruned.mat', m,MAXFUNCS));
+    catch
+      trainParams = aresparams(..., 
+        MAXFUNCS,...%21,...%maxFuncs,
+        3,...%c,
+        true,...%cubic,
+        2,...%cubicFastLevel,
+        1,...%selfInteractions,
+        1,...%maxInteractions,
+        1e-4,...%threshold,
+        false,...%prune,
+        -1,...%useMinSpan,
+        -1,...%useEndSpan,
+        Inf);%maxFinalFuncs
+      [model, time] = aresbuild(A, logDIH, trainParams);
+      save(sprintf('cache/computeTargetDIH_mars2_m%d_max%d_notpruned.mat',m,MAXFUNCS), 'model');
+    end
+    trainParams = aresparams(..., 
+      MAXFUNCS,...%21,...%maxFuncs,
+      3,...%c,
+      true,...%cubic,
+      2,...%cubicFastLevel,
+      1,...%selfInteractions,
+      1,...%maxInteractions,
+      1e-4,...%threshold,
+      true,...%prune,
+      -1,...%useMinSpan,
+      -1,...%useEndSpan,
+      Inf);%maxFinalFuncs
+    [model, time] = aresbuild(A, logDIH, trainParams, [], model);
+    save(sprintf('cache/computeTargetDIH_mars2_m%d_max%d.mat',m,MAXFUNCS), 'model');
+  end
+  fprintf('computeTargetDIH_mars2 TRAINING ERROR: %f\n', sqrt(model.MSE));
+  target_DIH = target_DIH + weights(i)*arespredict(model, M);
 end
-fprintf('computeTargetDIH_mars2 TRAINING ERROR: %f\n', sqrt(model.MSE));
-target_DIH = arespredict(model, M);
+target_DIH = target_DIH / sum(weights);
 target_DIH = exp(target_DIH)-1;
 end
 %TODO these functions make the arrays unsparse. Subtract the min value to
