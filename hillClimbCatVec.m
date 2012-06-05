@@ -1,4 +1,4 @@
-function [f,g] = hillClimbCatVec(A,B,f,g,logDIH,DIM,maxIndex)
+function [f,g,vtrain] = hillClimbCatVec(A,B,f,g,logDIH,DIM,maxIndex)
 constants;
 m = length(logDIH);
 STEP = 0.000025;
@@ -7,6 +7,7 @@ if nargin >= 7
 else
   indices = 1:prod(size(f));
 end
+vtrain = inf;
 x = reshape((A*g)',DIM*m,1).*reshape((A*f)',DIM*m,1);
 v = B*x;
 old = norm(postProcess(v)-logDIH);
