@@ -14,9 +14,10 @@ BASES = [2,4,6,8];
 NITERS= 40;
 ns = [133,147,155,160,182];
 seeds=123:130;
+m = size(ages,1);
 
 try
-  load(sprintf('cache/factor1_allpreds_hc%d.mat', HILLCLIMB));
+  load(sprintf('cache/factor1_allpreds_m%d_hc%d.mat', m,HILLCLIMB));
 catch
   offsets = [...
     SIZE.AGE*SIZE.SEX,...%1,...% a constant
@@ -196,7 +197,7 @@ catch
       end
     end
   end
-  save(sprintf('cache/factor1_allpreds_hc%d.mat', HILLCLIMB), 'target_DIH');
+  save(sprintf('cache/factor1_allpreds_m%d_hc%d.mat', m,HILLCLIMB), 'target_DIH');
 end
 target_DIH1 = median(target_DIH,2);
 target_DIH2 = mean(target_DIH,2);

@@ -352,19 +352,36 @@ all_yr3_pred = [all_yr3_pred, yr3_pred];
 err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
 disp(sprintf('%d TEST ERROR %f',size(all_yr3_pred,2),err));
 
+%33
+[yr3_pred] = computeTargetDIH_factor1(ages.yr2,genders.yr2,logDIH.yr2,...
+    fake_target.ages,fake_target.genders,drugs.features2_1yr,drugs.features3_1yr,...
+    lab.features2_1yr,lab.features3_1yr,f2.condGroup,f3.condGroup,...
+    f2.procedure,f3.procedure,f2.specialty,f3.specialty,...
+    f2.place,f3.place,drugs.extrafeatures2,drugs.extrafeatures3,...
+    lab.extrafeatures2,lab.extrafeatures3,f2.nproviders,f3.nproviders,...
+    f2.nvendors,f3.nvendors,f2.npcps,f3.npcps,f2.extraLoS,f3.extraLoS,f2.n,f3.n,...
+    f2.nspec,f3.nspec,f2.nplace,f3.nplace,f2.nproc,f3.nproc,f2.ncond,f3.ncond,...
+    f2.extraDSFS,f3.extraDSFS,f2.extraCharlson,f3.extraCharlson,...
+    f2.extraPcpProvVend,f3.extraPcpProvVend);
+ppp_yr3_pred = [ppp_yr3_pred, yr3_pred]; % pre-post-process
+yr3_pred = postProcessReal(yr3_pred);
+all_yr3_pred = [all_yr3_pred, yr3_pred];
+err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2)); yr3_rmse = [yr3_rmse; err];
+disp(sprintf('%d TEST ERROR %f',size(all_yr3_pred,2),err));
+
 yr3_pred = median(all_yr3_pred(:,27:29),2);
 err = sqrt(mean((logDIH.yr3-log(yr3_pred+1)).^2));
 disp(sprintf('SMALL MEDIAN PREDICTOR TEST ERROR %f',err));
 
 %testing mean RR
+yr3_opt_const = mean(logDIH.yr3);
+yr3_var = mean((logDIH.yr3 - yr3_opt_const).^2);
 [yr3_pred,yr3_weights] = meanRidgeRegression(all_yr3_pred, indices, ...
     {yr3_var, yr3_opt_const, yr3_rmse, 1.0});
 err = sqrt(mean((log(DIH.yr3+1)-log(yr3_pred+1)).^2));
 disp(sprintf('MEAN RIDGE REGRESSION TEST ERROR %f',err));
 
 % do ridge regression
-yr3_opt_const = mean(logDIH.yr3);
-yr3_var = mean((logDIH.yr3 - yr3_opt_const).^2);
 %have = find(yr4_rmse>0);
 have = [1:size(all_yr3_pred,2)]';
 [ indices ] = choosePredictors(@ridgeRegression, all_yr3_pred, have, yr3_var,...
