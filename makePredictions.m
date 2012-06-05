@@ -3,11 +3,6 @@ tic
 allDIH = []; NUM_OUTPUTS = 0;
 yr4_rmse = [];
 try
-    load('claims_all.mat');
-catch
-    save('claims_all.mat', 'claims');
-end
-try
     load('f2.mat');
 catch
     f2 = claims.f2;
@@ -306,7 +301,8 @@ end
 allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
 %yr4_rmse = [yr4_rmse; 0.465210]; % for 60 splines
-yr4_rmse = [yr4_rmse; 0.464453];
+%yr4_rmse = [yr4_rmse; 0.464453]; % for 100 splines
+yr4_rmse = [yr4_rmse; 0.464412]; % for 120 splines
 
 %ridge regression.
 allDIH = postProcessReal(allDIH);
