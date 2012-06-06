@@ -1,4 +1,4 @@
-function [target_DIH] = computeTargetDIH_factor1(ages,genders,logDIH_orig,...
+function [target_DIH] = computeTargetDIH_factor3(ages,genders,logDIH_orig,...
     ages_test,genders_test,drugs_train,drugs_test,lab_train,lab_test,cond_train,cond_test,...
     proc_train,proc_test,...
     spec_train,spec_test,place_train,place_test,...
@@ -8,17 +8,21 @@ function [target_DIH] = computeTargetDIH_factor1(ages,genders,logDIH_orig,...
     nproc_train,nproc_test,ncond_train,ncond_test,extradsfs_train,extradsfs_test,...
     exchar_train,exchar_test,extraprob_train,extraprob_test)
 constants;
+LAMBDA = 0.1;
 DIM= 1;
-HILLCLIMB = 0;
-BASES = [2,4,5,6,8];
+%HILLCLIMB = 0;
+BASES = [2,4,6,8];
+BASES = [6];
 NITERS= 40;
 ns = [133,147,155,160,182];
+ns = [133];
 seeds=123:130;
+seeds=123:123;
 m = size(ages,1);
 
 try
-  load('blah');%TODO
-  load(sprintf('cache/factor1_allpreds_m%d_hc%d.mat', m,HILLCLIMB));
+  load(sprintf('cache/factor3_allpreds_m%d_hc%d_lambda%d.mat', ...
+    m,HILLCLIMB,round(100000*LAMBDA)));
 catch
   offsets = [...
     SIZE.AGE*SIZE.SEX,...%1,...% a constant
@@ -100,7 +104,7 @@ catch
     spec_train, place_train, ndrugs_train, nlab_train, nprov_train, nvend_train,...
     npcp_train,extralos_train,nclaims_train,nspec_train,nplace_train,...
     nproc_train,ncond_train,extradsfs_train,exchar_train,extraprob_train];
-  A_orig = full(A_orig);
+  A_orig = sparse(A_orig);
   m = size(A_orig,1);
   agesex_test = ages_test + 10*(genders_test-1);
   agesex_test = sparse(1:length(ages_test), agesex_test, 1, length(ages_test), SIZE.AGE*SIZE.SEX);
@@ -108,27 +112,19 @@ catch
     spec_test,place_test,ndrugs_test,nlab_test,nprov_test,nvend_test,...
     npcp_test,extralos_test,nclaims_test,nspec_test,nplace_test,nproc_test,ncond_test,...
     extradsfs_test,exchar_test,extraprob_test]);
-  M = full(M);
+  M = sparse(M);
   m_test = size(M,1);
 
   try
-      load(sprintf('cache/computeTargetDIH_catvec1_DIM%d_m%d.mat',DIM,m));
+      load(sprintf('cache/C_DIM%d_m%d.mat',DIM,m));
   catch
-      B = sparse([],[],0,m,DIM*m,DIM*m);
       C=sparse(1:m,1:m,1,m,m);
-      B_test = sparse([],[],0,m_test,DIM*m_test,DIM*m_test);
       C_test=sparse(1:m_test,1:m_test,1,m_test,m_test);
-      for i=1:DIM
-          i
-          B(:,i:DIM:end) = C;
-          B_test(:,i:DIM:end) = C_test;
-      end
-      save(sprintf('cache/computeTargetDIH_catvec1_DIM%d_m%d.mat',DIM,m),'B','B_test');
+      save(sprintf('cache/C_DIM%d_m%d.mat',DIM,m),'C','C_test');
   end
   nstart = offsets(1)+1;
   numpred = length(seeds)*length(ns)*length(BASES);
-  predi=1;
-  target_DIH = zeros(m_test,numpred);
+  target_DIH = zeros(m_test,1);
   % Average over many bases
   for BASE=BASES
     % Average over many ns
@@ -143,69 +139,64 @@ catch
         % compute base ages
         c = A(:,1:offsets(BASE)) \ logDIH;
         remLogDIH = logDIH - A(:,1:offsets(BASE))*c;
-        fprintf('Base %d, n %d, seed %d, training error: %f\n', ...
-          BASE, n, seed, sqrt(mean(remLogDIH.^2)));
+        
+        fprintf('Base %d, n %d, seed %d, LAMBDA %f, training error: %f\n', ...
+          BASE, n, seed, LAMBDA, sqrt(mean(remLogDIH.^2)));
 
-        f = rand(n-nstart+1,DIM)-0.5; g = rand(n-nstart+1,DIM)-0.5;
-        prev_opt = inf; cur_opt = inf; cur_g = g; cur_f = f;
+        f=rand(n-nstart+1,DIM)-0.5; g=rand(n-nstart+1,DIM)-0.5; h=rand(n-nstart+1,DIM)-0.5;
+        prev_opt = inf; cur_opt = inf; cur_g = g; cur_f = f; cur_h=h;
         for i=1:NITERS
             try
-                load(sprintf('cache/factor1_DIM%d_m%d_i%d_seed%d_n%d_base%d.mat',...
-                    DIM,m,i,seed,n,BASE));
+                load(sprintf('cache/factor3_DIM%d_m%d_i%d_seed%d_n%d_base%d_lambda%d.mat',...
+                    DIM,m,i,seed,n,BASE,round(100000*LAMBDA)));
             catch
                 if prev_opt < cur_opt + CATVEC_TERMINATE_THRESH
                     break
                 end
+                %keyboard
                 prev_opt = cur_opt;
-                try
-                    G = A*g;
+                %try
+                    G = (A*g).*(A*h);
                     cvx_clear
                     cvx_begin quiet
-                        variables f(n-nstart+1,DIM) x(DIM*m);
-                        minimize( norm(B*x - remLogDIH) )
+                        %cvx_precision low
+                        variables f(n-nstart+1,DIM);
+                        minimize( norm( sum(C*(G.*(A*f)),2) - remLogDIH) + LAMBDA*norm(h.*g.*f) )
                         subject to
-                            x == reshape( (G.*(A*f))', DIM*m,1);
                     cvx_end
                     if ~strcmp(cvx_status,'Solved') && ~strcmp(cvx_status,'Inaccurate/Solved')
-                        'computeTargetDIH_factor1 failed'
+                        'computeTargetDIH_factor3 failed'
                         keyboard
                     end
-                    cur_opt = cvx_optval; cur_g = g; cur_f = f; 
-                    g = f; % this makes it so it keeps switching sides;
-                    save(sprintf('cache/factor1_DIM%d_m%d_i%d_seed%d_n%d_base%d.mat', ...
-                        DIM,m,i,seed,n,BASE), 'prev_opt','cur_opt','cur_g','cur_f','g');
-                catch
-                    disp('TERMINATED! PROBABLY RAN OUT OF MEMORY');
-                    break
-                end
+                    cur_opt = cvx_optval; cur_h = h; cur_g = g; cur_f = f; 
+                    h = g; g = f; % this makes it so it keeps switching sides;
+                    save(sprintf('cache/factor3_DIM%d_m%d_i%d_seed%d_n%d_base%d_lambda%d.mat', ...
+                        DIM,m,i,seed,n,BASE,round(100000*LAMBDA)), ...
+                        'prev_opt','cur_opt','cur_g','cur_f','cur_h','g','h');
+                %catch
+                %    disp('TERMINATED! PROBABLY RAN OUT OF MEMORY');
+                %    break
+                %end
             end
-            %disp(sprintf('ITER %d: factor1 TRAINING ERROR: %f',i,sqrt((cur_opt^2)/m)))
+            % note that error+penalty doesnt necessarily decrease because 
+            % postProcessing is not included in the optimization
+            G = (A*cur_g).*(A*cur_h).*(A*cur_f);
+            err = sqrt((norm(postProcess( sum(C*G,2) )-remLogDIH)^2)/m);
+            fprintf('ITER %d: factor3 TRAINING ERROR: %f, PENALTY: %f\n', ...
+              i,err, LAMBDA*norm(cur_f.*cur_g.*cur_h));
         end
-        disp(sprintf('factor1 TRAINING ERROR: %f',sqrt((cur_opt^2)/m)))
+        fprintf('factor3 TRAINING ERROR: %f, PENALTY: %f\n', ...
+          err, LAMBDA*norm(cur_f.*cur_g.*cur_h));
 
-        if HILLCLIMB
-          x = reshape((A*cur_g)',DIM*m,1).*reshape((A*cur_f)',DIM*m,1);
-          err = sqrt((norm(postProcess(B*x)-remLogDIH)^2)/m);
-          disp(sprintf('factor1 preHILLCLIMB TRAINING ERROR: %f',err));
-          [cur_f,cur_g] = hillClimbCatVec(A,B,cur_f,cur_g,remLogDIH,DIM);
-          x = reshape((A*cur_g)',DIM*m,1).*reshape((A*cur_f)',DIM*m,1);
-          err = sqrt((norm(postProcess(B*x)-remLogDIH)^2)/m);
-          fprintf('factor1 HILLCLIMB TRAINING ERROR: %f\n',err);
-        end
-
-        x = reshape( ((M(:,nstart:n)*cur_g).*(M(:,nstart:n)*cur_f))', DIM*m_test,1);
-        target_DIH(:,predi) = M(:,1:offsets(BASE))*c + B_test*x;
-        predi=predi+1;
+        x = (M(:,nstart:n)*cur_g).*(M(:,nstart:n)*cur_f).*(M(:,nstart:n)*cur_h);
+        target_DIH = target_DIH + M(:,1:offsets(BASE))*c + sum(C_test*x,2);
       end
     end
   end
-  save(sprintf('cache/factor1_allpreds_m%d_hc%d.mat', m,HILLCLIMB), 'target_DIH');
+  %save(sprintf('cache/factor3_allpreds_m%d_hc%d_lambda%d.mat', ...
+  %    m,HILLCLIMB,round(100000*LAMBDA)), 'target_DIH');
 end
-target_DIH1 = median(target_DIH,2);
-target_DIH2 = mean(target_DIH,2);
-size(target_DIH1)
-size(target_DIH2)
-target_DIH = mean([target_DIH1,target_DIH2],2);
+target_DIH = target_DIH / numpred;
 target_DIH = exp(target_DIH)-1;
 end
 %TODO these functions make the arrays unsparse. Subtract the min value to
