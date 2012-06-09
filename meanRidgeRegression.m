@@ -9,12 +9,13 @@ if size(indices,2) > 1
 end
 rand('seed',1234'); randn('seed',1234);
 [m,n] = size(preds);
-weights = zeros(length(indices),1);
+weights = zeros(max(indices),1);
 target = zeros(m,1);
-NITERS = 1000;
+NITERS = 100;
 N = 20;
 for i=1:NITERS
-    r = randperm(length(indices), N);
+    r = randperm(length(indices));
+    r=r(1:N);
     I = indices(r);
     args{1} = test_var;
     args{2} = test_opt_const;

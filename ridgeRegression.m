@@ -7,7 +7,7 @@ leaderboard_scores=args{3}(indices);
 quiz_fraction=args{4};
 % m_test is the number of predictions for the target year
 [m_test,n] = size(preds);
-ALPHA = 0.002;%0.0015;
+ALPHA = 0.01;%0.0015;
 alpha = ALPHA*m_test;
 
 % preds is in day space so change it to log space

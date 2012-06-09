@@ -164,7 +164,8 @@ P_test = [ones(m_test,1), p_test.^0.1, p_test.^0.3, p_test.^0.5, p_test.^0.8,...
 %P_test = kernel(p_test,3);
 
 % combine svm1 and svm2
-load(sprintf('cache/computeTargetDIH_svm1_m%d_cols182_groups25.mat', m));
+load(sprintf('cache/svm1_m%d_cols182_groups25.mat', m));
+load(sprintf('cache/svm1_mtest%d_cols182_groups25.mat', m_test));
 P = [ones(m,1), p.^0.1, p.^0.3, p.^0.5, p.^0.8, p,  ...
   log(p+1), exp(0.1*p), log(p+0.3)];
 P_test = [ones(m_test,1), p_test.^0.1, p_test.^0.3, p_test.^0.5, p_test.^0.8,...

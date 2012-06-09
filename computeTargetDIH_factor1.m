@@ -17,7 +17,6 @@ seeds=123:130;
 m = size(ages,1);
 
 try
-  load('blah');%TODO
   load(sprintf('cache/factor1_allpreds_m%d_hc%d.mat', m,HILLCLIMB));
 catch
   offsets = [...
@@ -203,8 +202,6 @@ catch
 end
 target_DIH1 = median(target_DIH,2);
 target_DIH2 = mean(target_DIH,2);
-size(target_DIH1)
-size(target_DIH2)
 target_DIH = mean([target_DIH1,target_DIH2],2);
 target_DIH = exp(target_DIH)-1;
 end

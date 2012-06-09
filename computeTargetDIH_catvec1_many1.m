@@ -31,28 +31,20 @@ cols_i = agesex;
 val = 1;
 
 % map the data to a new space
-try
-    load(sprintf('cache/catvec1_many1_data_m%d.mat',m));
-catch
-    drugs_train = drugMap(drugs_train);
-    drugs_test = drugMap(drugs_test);
-    lab_train = labMap(lab_train);
-    lab_test = labMap(lab_test);
-    cond_train = condMap(cond_train);
-    cond_test = condMap(cond_test);
-    proc_train = procMap(proc_train);
-    proc_test = procMap(proc_test);
-    los_train = losMap(los_train);
-    los_test = losMap(los_test);
-    spec_train = specMap(spec_train);
-    spec_test = specMap(spec_test);
-    place_train = placeMap(place_train);
-    place_test = placeMap(place_test);
-    save(sprintf('cache/catvec1_many1_data_m%d.mat',m),'drugs_train','lab_train',...
-        'cond_train','proc_train','los_train','spec_train','place_train',...
-        'drugs_test','lab_test','cond_test','proc_test','los_test',...
-        'spec_test','place_test');
-end
+drugs_train = drugMap(drugs_train);
+drugs_test = drugMap(drugs_test);
+lab_train = labMap(lab_train);
+lab_test = labMap(lab_test);
+cond_train = condMap(cond_train);
+cond_test = condMap(cond_test);
+proc_train = procMap(proc_train);
+proc_test = procMap(proc_test);
+los_train = losMap(los_train);
+los_test = losMap(los_test);
+spec_train = specMap(spec_train);
+spec_test = specMap(spec_test);
+place_train = placeMap(place_train);
+place_test = placeMap(place_test);
 
 A = [full(sparse(rows_i, cols_i, val, nrows, ncols)), ...
     drugs_train, lab_train, cond_train, proc_train, los_train,...
@@ -74,18 +66,24 @@ M_pca = scores(:,1:num_pc)*pc(:,1:num_pc)' + M_means;
 clear M_means ages_test genders_test agesex_test drugs_test lab_test cond_test proc_test...
     los_test spec_test place_test
 try
-    load(sprintf('cache/computeTargetDIH_catvec1_DIM%d_m%d.mat',DIM,m));
+    load(sprintf('cache/B_DIM%d_m%d.mat',DIM,m));
 catch
     B = sparse([],[],0,m,DIM*m,DIM*m);
     C=sparse(1:m,1:m,1,m,m);
+    for i=1:DIM
+        B(:,i:DIM:end) = C;
+    end
+    save(sprintf('cache/B_DIM%d_m%d.mat',DIM,m),'B');
+end
+try
+    load(sprintf('cache/Btest_DIM%d_m%d.mat',DIM,m_test));
+catch
     B_test = sparse([],[],0,m_test,DIM*m_test,DIM*m_test);
     C_test=sparse(1:m_test,1:m_test,1,m_test,m_test);
     for i=1:DIM
-        i
-        B(:,i:DIM:end) = C;
         B_test(:,i:DIM:end) = C_test;
     end
-    save(sprintf('cache/computeTargetDIH_catvec1_DIM%d_m%d.mat',DIM,m),'B','B_test');
+    save(sprintf('cache/Btest_DIM%d_m%d.mat',DIM,m_test),'B_test');
 end
 f = rand(n,DIM)-0.5; g = rand(n,DIM)-0.5;
 %disp('Starting cvx');

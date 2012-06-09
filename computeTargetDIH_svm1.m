@@ -14,7 +14,11 @@ NCOLS = 133;
 NCOLS = 182;
 try
   m = length(ages);
-  load(sprintf('cache/computeTargetDIH_svm1_m%d_cols%d_groups%d.mat', m,NCOLS,NGROUPS));
+  filename = sprintf('cache/svm1_m%d_cols%d_groups%d.mat', m,NCOLS,NGROUPS);
+  load(filename);
+  m_test = length(ages_test);
+  filename = sprintf('cache/svm1_mtest%d_cols%d_groups%d.mat', m_test,NCOLS,NGROUPS);
+  load(filename);
 catch
   constants;
   ZSCORE = false; %TODO must use same means and vars for both A and M
@@ -45,7 +49,7 @@ catch
       SIZE.EXTRAPROB,...
       ];
   offsets = cumsum(offsets);
-  offsets = [0; offsets(1:end)']
+  offsets = [0; offsets(1:end)'];
 
   agesex = ages + 10*(genders-1);
   nrows = length(agesex);
@@ -133,8 +137,10 @@ catch
     p = p + svmclassify(s,A);
     p_test = p_test + svmclassify(s,M);
   end
-  save(sprintf('cache/computeTargetDIH_svm1_m%d_cols%d_groups%d.mat',m,NCOLS,NGROUPS),...
-    'p','p_test','logDIH');
+  save(sprintf('cache/svm1_m%d_cols%d_groups%d.mat',m,NCOLS,NGROUPS),...
+    'p','logDIH');
+  save(sprintf('cache/svm1_mtest%d_cols%d_groups%d.mat',m_test,NCOLS,NGROUPS),...
+    'p_test');
 end
 m_test = size(p_test,1);
 P = [ones(m,1), p.^0.1, p.^0.3, p.^0.5, p.^0.8, p,  ...

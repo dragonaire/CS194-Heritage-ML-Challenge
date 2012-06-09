@@ -62,18 +62,24 @@ M = sparse([agesex_test,ndrugs_test,nlab_test,nprov_test,nvend_test,...
 M_pca = sparse(M);
 
 try
-    load(sprintf('cache/computeTargetDIH_catvec1_DIM%d_m%d.mat',DIM,m));
+    load(sprintf('cache/B_DIM%d_m%d.mat',DIM,m));
 catch
     B = sparse([],[],0,m,DIM*m,DIM*m);
     C=sparse(1:m,1:m,1,m,m);
+    for i=1:DIM
+        B(:,i:DIM:end) = C;
+    end
+    save(sprintf('cache/B_DIM%d_m%d.mat',DIM,m),'B');
+end
+try
+    load(sprintf('cache/Btest_DIM%d_m%d.mat',DIM,m_test));
+catch
     B_test = sparse([],[],0,m_test,DIM*m_test,DIM*m_test);
     C_test=sparse(1:m_test,1:m_test,1,m_test,m_test);
     for i=1:DIM
-        i
-        B(:,i:DIM:end) = C;
         B_test(:,i:DIM:end) = C_test;
     end
-    save(sprintf('cache/computeTargetDIH_catvec1_DIM%d_m%d.mat',DIM,m),'B','B_test');
+    save(sprintf('cache/Btest_DIM%d_m%d.mat',DIM,m_test),'B_test');
 end
 f = rand(n,DIM)-0.5; g = rand(n,DIM)-0.5;
 %disp('Starting cvx');
