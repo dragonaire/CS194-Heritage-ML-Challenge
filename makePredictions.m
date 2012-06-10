@@ -176,7 +176,7 @@ catch
             f3.specPlace,f4.specPlace);
         allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
         writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
-        yr4_rmse = [yr4_rmse; 0];
+        yr4_rmse = [yr4_rmse; 0.470003];
 
         %19
         [target.DIH c4] = computeTargetDIH_condspeccombo(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
@@ -393,6 +393,35 @@ end
 
     save('cache/makePredictions_38.mat','allDIH','NUM_OUTPUTS','yr4_rmse');
 end
+
+%39
+target.DIH = readPredictions('TargetGBM5000.csv');
+allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+yr4_rmse = [yr4_rmse; 0.463113];
+%40
+target.DIH = readPredictions('TargetGBM10000.csv');
+allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+yr4_rmse = [yr4_rmse; 0.462848];
+%41 optimal constant
+target.DIH = 0.209179*ones(NUM_TARGETS,1);
+allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+yr4_rmse = [yr4_rmse; 0.486459];
+%42
+[target.DIH] = computeTargetDIH_ens1(ages.yr2,genders.yr2,logDIH.yr2,target.ages,target.genders,...
+    drugs.features2_1yr,drugs.features4_1yr,lab.features2_1yr,lab.features4_1yr,...
+    f2.condGroup,f4.condGroup,f2.procedure,f4.procedure,...
+    f2.specialty,f4.specialty,f2.place,f4.place,...
+    drugs.extrafeatures2,drugs.extrafeatures4,lab.extrafeatures2,lab.extrafeatures4,...
+    f2.nproviders,f4.nproviders,f2.nvendors,f4.nvendors,f2.npcps,f4.npcps,f2.extraLoS,f4.extraLoS,...
+    f2.n,f4.n,f2.nspec,f4.nspec,f2.nplace,f4.nplace,f2.nproc,f4.nproc,f2.ncond,f4.ncond,...
+    f2.extraDSFS,f4.extraDSFS,f2.extraCharlson,f4.extraCharlson,...
+    f2.extraPcpProvVend,f4.extraPcpProvVend);
+allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+yr4_rmse = [yr4_rmse; 0];
 
 
 %mean RR
