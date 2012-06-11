@@ -22,6 +22,12 @@ catch
 end
 clear claims;
 try
+    load('cache/makePredictions_51.mat');
+catch
+try
+    load('cache/makePredictions_48.mat');
+catch
+try
     load('cache/makePredictions_38.mat');
 catch
 try
@@ -245,13 +251,13 @@ catch
             f3.extraPcpProvVend,f4.extraPcpProvVend);
         allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
         writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
-        yr4_rmse = [yr4_rmse; 0.465448];%TODO is this wrong?
+        yr4_rmse = [yr4_rmse; 0.465448];
 
         %28
-        median(allDIH(:,[1,3,9,10,11,12,13,14,16,17,19,21,25,26,27]),2);
+        target.DIH = median(allDIH(:,[1,3,9,10,11,12,13,14,16,17,19,21,25,26,27]),2);
         allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
         writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
-        yr4_rmse = [yr4_rmse; 0.465448];
+        yr4_rmse = [yr4_rmse; 0];
 
         %29
         [target.DIH] = computeTargetDIH_svm1(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
@@ -394,34 +400,120 @@ end
     save('cache/makePredictions_38.mat','allDIH','NUM_OUTPUTS','yr4_rmse');
 end
 
-%39
-target.DIH = readPredictions('TargetGBM5000.csv');
+    %39
+    target.DIH = readPredictions('TargetGBM5000.csv');
+    allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+    writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+    yr4_rmse = [yr4_rmse; 0.463113];
+    %40
+    target.DIH = readPredictions('TargetGBM10000.csv');
+    allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+    writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+    yr4_rmse = [yr4_rmse; 0.462848];
+    %41 optimal constant
+    target.DIH = 0.209179*ones(NUM_TARGETS,1);
+    allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+    writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+    yr4_rmse = [yr4_rmse; 0.486459];
+    %42
+    %trained on year 2
+    [target.DIH] = computeTargetDIH_ens1(ages.yr2,genders.yr2,logDIH.yr2,target.ages,target.genders,...
+        drugs.features2_1yr,drugs.features4_1yr,lab.features2_1yr,lab.features4_1yr,...
+        f2.condGroup,f4.condGroup,f2.procedure,f4.procedure,...
+        f2.specialty,f4.specialty,f2.place,f4.place,...
+        drugs.extrafeatures2,drugs.extrafeatures4,lab.extrafeatures2,lab.extrafeatures4,...
+        f2.nproviders,f4.nproviders,f2.nvendors,f4.nvendors,f2.npcps,f4.npcps,f2.extraLoS,f4.extraLoS,...
+        f2.n,f4.n,f2.nspec,f4.nspec,f2.nplace,f4.nplace,f2.nproc,f4.nproc,f2.ncond,f4.ncond,...
+        f2.extraDSFS,f4.extraDSFS,f2.extraCharlson,f4.extraCharlson,...
+        f2.extraPcpProvVend,f4.extraPcpProvVend,1000,2e-5);
+    allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+    writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+    yr4_rmse = [yr4_rmse; 0.467125];
+    %43
+    target.DIH = readPredictions('Target_GBM14_T10000_y2.csv');
+    allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+    writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+    yr4_rmse = [yr4_rmse; 0.464797];
+    %44 actually the same as #39
+    target.DIH = readPredictions('Target_GBM5000_1.csv');
+    allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+    writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+    yr4_rmse = [yr4_rmse; 0];
+    %45
+    target.DIH = readPredictions('Target_GBM4_T10500.csv');
+    allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+    writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+    yr4_rmse = [yr4_rmse; 0.462793];
+    %46
+    target.DIH = median(allDIH(:,35:38),2);
+    allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+    writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+    yr4_rmse = [yr4_rmse; 0.464908];
+    %47
+    target.DIH = median(allDIH(:,[26,39,40,43,44,45]),2);
+    allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+    writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+    yr4_rmse = [yr4_rmse; 0.462856];
+    %48
+    target.DIH = median(allDIH(:,[6,7,15,29]),2);
+    allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+    writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+    yr4_rmse = [yr4_rmse; 0.472098];
+
+    save('cache/makePredictions_48.mat','allDIH','NUM_OUTPUTS','yr4_rmse');
+end
+    %49
+    target.DIH = median(allDIH(:,[39,43]),2);
+    allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+    writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+    yr4_rmse = [yr4_rmse; 0.463490];
+    %50
+    [target.DIH] = computeTargetDIH_ens1(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
+        drugs.features3_1yr,drugs.features4_1yr,lab.features3_1yr,lab.features4_1yr,...
+        f3.condGroup,f4.condGroup,f3.procedure,f4.procedure,...
+        f3.specialty,f4.specialty,f3.place,f4.place,...
+        drugs.extrafeatures3,drugs.extrafeatures4,lab.extrafeatures3,lab.extrafeatures4,...
+        f3.nproviders,f4.nproviders,f3.nvendors,f4.nvendors,f3.npcps,f4.npcps,f3.extraLoS,f4.extraLoS,...
+        f3.n,f4.n,f3.nspec,f4.nspec,f3.nplace,f4.nplace,f3.nproc,f4.nproc,f3.ncond,f4.ncond,...
+        f3.extraDSFS,f4.extraDSFS,f3.extraCharlson,f4.extraCharlson,...
+        f3.extraPcpProvVend,f4.extraPcpProvVend,1000,2e-5);
+    allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+    writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+    yr4_rmse = [yr4_rmse; 0.465353];
+    %51
+    [target.DIH] = computeTargetDIH_ens1(ages.yr3,genders.yr3,logDIH.yr3,target.ages,target.genders,...
+        drugs.features3_1yr,drugs.features4_1yr,lab.features3_1yr,lab.features4_1yr,...
+        f3.condGroup,f4.condGroup,f3.procedure,f4.procedure,...
+        f3.specialty,f4.specialty,f3.place,f4.place,...
+        drugs.extrafeatures3,drugs.extrafeatures4,lab.extrafeatures3,lab.extrafeatures4,...
+        f3.nproviders,f4.nproviders,f3.nvendors,f4.nvendors,f3.npcps,f4.npcps,f3.extraLoS,f4.extraLoS,...
+        f3.n,f4.n,f3.nspec,f4.nspec,f3.nplace,f4.nplace,f3.nproc,f4.nproc,f3.ncond,f4.ncond,...
+        f3.extraDSFS,f4.extraDSFS,f3.extraCharlson,f4.extraCharlson,...
+        f3.extraPcpProvVend,f4.extraPcpProvVend,1000,0);
+    allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+    writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+    yr4_rmse = [yr4_rmse; 0.469822];
+    save('cache/makePredictions_51.mat','allDIH','NUM_OUTPUTS','yr4_rmse');
+end
+%52
+target.DIH = median(allDIH(:,[27,28,30,31,39,42,43,47,48,50,51]),2);
 allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
-yr4_rmse = [yr4_rmse; 0.463113];
-%40
-target.DIH = readPredictions('TargetGBM10000.csv');
+yr4_rmse = [yr4_rmse; 0.463879];
+%53
+target.DIH = readPredictions('TargetRF2000.csv');
 allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
-yr4_rmse = [yr4_rmse; 0.462848];
-%41 optimal constant
-target.DIH = 0.209179*ones(NUM_TARGETS,1);
-allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
-writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
-yr4_rmse = [yr4_rmse; 0.486459];
-%42
-[target.DIH] = computeTargetDIH_ens1(ages.yr2,genders.yr2,logDIH.yr2,target.ages,target.genders,...
-    drugs.features2_1yr,drugs.features4_1yr,lab.features2_1yr,lab.features4_1yr,...
-    f2.condGroup,f4.condGroup,f2.procedure,f4.procedure,...
-    f2.specialty,f4.specialty,f2.place,f4.place,...
-    drugs.extrafeatures2,drugs.extrafeatures4,lab.extrafeatures2,lab.extrafeatures4,...
-    f2.nproviders,f4.nproviders,f2.nvendors,f4.nvendors,f2.npcps,f4.npcps,f2.extraLoS,f4.extraLoS,...
-    f2.n,f4.n,f2.nspec,f4.nspec,f2.nplace,f4.nplace,f2.nproc,f4.nproc,f2.ncond,f4.ncond,...
-    f2.extraDSFS,f4.extraDSFS,f2.extraCharlson,f4.extraCharlson,...
-    f2.extraPcpProvVend,f4.extraPcpProvVend);
+yr4_rmse = [yr4_rmse; 0.473630];
+
+%{
+%?????????????????
+target.DIH = median(allDIH(:,[42,????]),2);
 allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
 yr4_rmse = [yr4_rmse; 0];
+%}
+
 
 
 %mean RR

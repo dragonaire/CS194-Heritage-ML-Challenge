@@ -109,7 +109,7 @@ A = A(r,:);
 logDIH=logDIH(r);
 [m_test, n] = size(M);
 
-TREES = 3;
+TREES = 10;
 try
   load(sprintf('cache/ens2_m%d_trees%d.mat', m, TREES));
 catch

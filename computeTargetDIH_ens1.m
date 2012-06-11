@@ -6,7 +6,8 @@ function [target_DIH] = computeTargetDIH_ens1(ages,genders,logDIH,...
     nvend_train,nvend_test,npcp_train,npcp_test,extralos_train,extralos_test,...
     nclaims_train,nclaims_test,nspec_train,nspec_test,nplace_train,nplace_test,...
     nproc_train,nproc_test,ncond_train,ncond_test,extradsfs_train,extradsfs_test,...
-    exchar_train,exchar_test,extraprob_train,extraprob_test)
+    exchar_train,exchar_test,extraprob_train,extraprob_test,...
+    TREES,LAMBDA)
 addpath('ARESlab');
 NGROUPS = 1;
 constants;
@@ -109,14 +110,39 @@ A = A(r,:);
 logDIH=logDIH(r);
 [m_test, n] = size(M);
 
-TREES = 100;
 try
+  sprintf('cache/ens1_m%d_trees%d.mat', m, TREES)
   load(sprintf('cache/ens1_m%d_trees%d.mat', m, TREES));
 catch
-  ens = fitensemble(A,logDIH,'LSBoost', TREES,'tree')
+  disp('fitting ensemble');
+  ens = fitensemble(A,logDIH,'LSBoost', TREES,'tree');
   save(sprintf('cache/ens1_m%d_trees%d.mat', m, TREES), 'ens');
 end
-target_DIH = predict(ens, M);
+%{
+try
+  load(sprintf('cache/ens1_reg_m%d_trees%d.mat', ...
+    m, TREES));
+catch
+  disp('regularizing...');
+  small = regularize(ens,'verbose',1,'lambda',logspace(-6,-4,100))
+  save(sprintf('cache/ens1_reg_m%d_trees%d.mat', ...
+    m, TREES), 'small');
+end
+%}
+if LAMBDA
+  try
+    load(sprintf('cache/ens1_shrink_m%d_trees%d_lambda%d.mat', ...
+      m, TREES, 1000000*LAMBDA));
+  catch
+    disp('shrinking...');
+    small = shrink(ens,'lambda', LAMBDA)
+    save(sprintf('cache/ens1_shrink_m%d_trees%d_lambda%d.mat', ...
+      m, TREES, 1000000*LAMBDA), 'small');
+  end
+  target_DIH = predict(small, M);
+else
+  target_DIH = predict(ens, M);
+end
 target_DIH = exp(target_DIH)-1;
 end
 %TODO these functions make the arrays unsparse. Subtract the min value to
