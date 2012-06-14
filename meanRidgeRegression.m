@@ -11,8 +11,8 @@ rand('seed',1234'); randn('seed',1234);
 [m,n] = size(preds);
 weights = zeros(max(indices),1);
 target = zeros(m,1);
-NITERS = 100;
-N = 20;
+NITERS = 1000;
+N = 30;
 for i=1:NITERS
     r = randperm(length(indices));
     r=r(1:N);

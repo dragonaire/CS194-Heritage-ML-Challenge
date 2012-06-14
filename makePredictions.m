@@ -505,6 +505,22 @@ target.DIH = readPredictions('TargetRF2000.csv');
 allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
 yr4_rmse = [yr4_rmse; 0.473630];
+%54
+allDIH = postProcessReal(allDIH);
+have = [3,6,7,10:13,15,16,18,19,21,27,29:31,35,37:39,42:44,47:53];
+[ indices ] = choosePredictors(@ridgeRegression, allDIH, have, LEADERBOARD_VAR,...
+    LEADERBOARD_OPT_CONST, yr4_rmse, 0.3);
+[target.DIH,with_overfit,weights] = ridgeRegression(allDIH,indices,...
+    {LEADERBOARD_VAR,LEADERBOARD_OPT_CONST, yr4_rmse, 0.3});
+allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+%yr4_rmse = [yr4_rmse; 0.535229];
+yr4_rmse = [yr4_rmse; 0];
+%55
+target.DIH = readPredictions('RF2000_all_DIH.csv');
+allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
+writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
+yr4_rmse = [yr4_rmse; 0.474700];
 
 %{
 %?????????????????
@@ -517,15 +533,14 @@ yr4_rmse = [yr4_rmse; 0];
 
 
 %mean RR
-allDIH = postProcessReal(allDIH);
+disp('STARTING MEAN RIDGE REGRESSION');
 have = find(yr4_rmse>0);
-%{
+allDIH = postProcessReal(allDIH);
 [target.DIH,weights] = meanRidgeRegression(allDIH, ...
     LEADERBOARD_VAR, LEADERBOARD_OPT_CONST, yr4_rmse, 0.3, have);
 allDIH = [allDIH, target.DIH]; NUM_OUTPUTS = NUM_OUTPUTS + 1;
 writeTarget(sprintf('Target_%d.csv',NUM_OUTPUTS),target);
 disp('MEAN RIDGE REGRESSION TEST ERROR DONE');
-%}
 
 %ridge regression.
 [ indices ] = choosePredictors(@ridgeRegression, allDIH, have, LEADERBOARD_VAR,...
